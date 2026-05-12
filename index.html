@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOT START KEY</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0b0f1a;
+  font-family:sans-serif;
+  color:white;
+  height:100vh;
+}
+
+.chat{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* TOP */
+
+.top{
+  background:#121826;
+  padding:18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.3);
+}
+
+.avatar{
+  width:45px;
+  height:45px;
+  border-radius:50%;
+  background:linear-gradient(45deg,#00bfff,#0066ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+
+/* COMMAND */
+
+.cmds{
+  display:flex;
+  gap:10px;
+  padding:10px;
+  background:#0f1524;
+}
+
+.cmdBtn{
+  background:#1c2436;
+  padding:10px 16px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.cmdBtn:hover{
+  background:#00bfff;
+}
+
+/* CHAT */
+
+.messages{
+  flex:1;
+  overflow:auto;
+  padding:15px;
+}
+
+.msg{
+  max-width:80%;
+  padding:14px;
+  margin:10px 0;
+  border-radius:18px;
+  line-height:1.5;
+  animation:show 0.2s ease;
+}
+
+@keyframes show{
+  from{
+    transform:translateY(10px);
+    opacity:0;
+  }
+  to{
+    transform:translateY(0);
+    opacity:1;
+  }
+}
+
+.user{
+  margin-left:auto;
+  background:linear-gradient(45deg,#00bfff,#0066ff);
+  border-bottom-right-radius:5px;
+}
+
+.bot{
+  background:#1b2233;
+  border-bottom-left-radius:5px;
+}
+
+/* INPUT */
+
+.inputBox{
+  display:flex;
+  gap:10px;
+  padding:15px;
+  background:#121826;
+}
+
+.inputBox input{
+  flex:1;
+  padding:14px;
+  border:none;
+  border-radius:15px;
+  background:#1c2436;
+  color:white;
+  outline:none;
+  font-size:15px;
+}
+
+.inputBox button{
+  width:110px;
+  border:none;
+  border-radius:15px;
+  background:linear-gradient(45deg,#00bfff,#0066ff);
+  color:white;
+  cursor:pointer;
+  font-size:15px;
+}
+
+a{
+  color:#00ff99;
+  text-decoration:none;
+  font-weight:bold;
+}
+
+::-webkit-scrollbar{
+  width:5px;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#00bfff;
+  border-radius:10px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="chat">
+
+<!-- TOP -->
+
+<div class="top">
+
+<div class="avatar">
+K
+</div>
+
+<div>
+<b>BOT START KEY</b><br>
+<small>Online</small>
+</div>
+
+</div>
+
+<!-- COMMAND -->
+
+<div class="cmds">
+
+<div class="cmdBtn" onclick="autoStart()">
+/start
+</div>
+
+</div>
+
+<!-- MESSAGES -->
+
+<div class="messages" id="messages"></div>
+
+<!-- INPUT -->
+
+<div class="inputBox">
+
+<input id="msg" placeholder="Nhập lệnh...">
+
+<button onclick="send()">
+Gửi
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+// ===== API =====
+const API = "https://script.google.com/macros/s/AKfycbxa6568yT8EIZ-Yl0axmK8VyBvieFC8GzEgspBPNwIvzCnVOw23paK6mUSpyofnS9Hr/exec";
+
+// ENTER SEND
+msg.addEventListener("keypress", function(e){
+
+  if(e.key === "Enter"){
+    send();
+  }
+
+});
+
+// MESSAGE
+function addMsg(text,type){
+
+  let div = document.createElement("div");
+
+  div.className = "msg " + type;
+
+  div.innerHTML = text;
+
+  messages.appendChild(div);
+
+  messages.scrollTop = messages.scrollHeight;
+}
+
+// AUTO START
+function autoStart(){
+
+  msg.value="/start ";
+
+  msg.focus();
+}
+
+// START MESSAGE
+addMsg(`
+🤖 Xin chào<br><br>
+
+Nhấn nút /start hoặc nhập:<br><br>
+
+<b>/start KEY</b>
+`,"bot");
+
+// SEND
+async function send(){
+
+  let text = msg.value.trim();
+
+  if(text=="") return;
+
+  addMsg(text,"user");
+
+  // START
+  if(text.startsWith("/start")){
+
+    let parts = text.split(" ");
+
+    if(parts.length < 2){
+
+      addMsg(`
+      ❌ Vui lòng nhập key<br><br>
+
+      Ví dụ:<br>
+      /start ABC123
+      `,"bot");
+
+      msg.value="";
+
+      return;
+    }
+
+    let key = parts[1];
+
+    let res = await fetch(API,{
+      method:"POST",
+      body:JSON.stringify({
+        action:"getKey",
+        key
+      })
+    });
+
+    let data = await res.json();
+
+    // FOUND
+    if(data.status=="found"){
+
+      addMsg(`
+      ✅ KEY HỢP LỆ<br><br>
+
+      🔑 ${key}<br><br>
+
+      ⏰ Hạn:<br>
+      ${data.expire}<br><br>
+
+      <a href="${data.link}" target="_blank">
+      👉 MỞ LINK
+      </a>
+      `,"bot");
+    }
+
+    // EXPIRED
+    else if(data.status=="expired"){
+
+      addMsg(`
+      ❌ KEY ĐÃ HẾT HẠN
+      `,"bot");
+    }
+
+    // NOT FOUND
+    else{
+
+      addMsg(`
+      ❌ KEY KHÔNG TỒN TẠI
+      `,"bot");
+    }
+  }
+
+  // INVALID
+  else{
+
+    addMsg(`
+    ❌ Sai lệnh<br><br>
+
+    Dùng:<br>
+    /start KEY
+    `,"bot");
+  }
+
+  msg.value="";
+}
+
+</script>
+
+</body>
+</html>
