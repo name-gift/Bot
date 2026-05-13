@@ -7,6 +7,17 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- ==================== SCRIPT CHUYỂN SANG LOADING ==================== -->
+<script>
+/* CHỈ NHẢY SANG LOADING 1 LẦN */
+if (!sessionStorage.getItem("fromLoading")) {
+    sessionStorage.setItem("fromLoading", "1");
+    setTimeout(() => {
+        window.location.replace("loading.html");
+    }, 300); // 300ms delay trước khi hiển thị loading
+}
+</script>
+
 <style>
 
 *{
