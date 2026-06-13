@@ -134,20 +134,40 @@ Gửi
 <script>
 
 const API =
-"https://script.google.com/macros/s/AKfycbxsIJ5VEoZnuLxme1haWqnbDOlFMVANdBl3gsrX9p0oCFhK6GGh2dHPu7tAFP1kJd6N/exec";
+"https://bot-api.abcd1601ab.workers.dev/";
 
-let maintenance =
-localStorage.getItem("maintenance") == "true";
+let maintenance = false;
 
-if(maintenance){
+async function loadMaintenance(){
 
-statusText.innerHTML =
-"🛠 Đang bảo trì";
+    let res = await fetch(API,{
+        method:"POST",
+        body:JSON.stringify({
+            action:"getMaintenance"
+        })
+    });
 
-maintOverlay.style.display =
-"flex";
+    let data = await res.json();
 
+    maintenance = data.maintenance;
+
+    statusText.innerHTML =
+        maintenance
+        ? "🛠 Đang bảo trì"
+        : "🟢 Online";
+
+    if(maintenance){
+        document.querySelector(".chat").style.display = "none";
+        maintOverlay.style.display = "flex";
+    }else{
+        document.querySelector(".chat").style.display = "flex";
+        maintOverlay.style.display = "none";
+    }
 }
+
+loadMaintenance();
+
+setInterval(loadMaintenance,30000);
 
 function addMsg(text,type){
 
