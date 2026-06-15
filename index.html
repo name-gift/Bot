@@ -3,86 +3,155 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BOT KEY VIP</title>
+<title>BOT START KEY</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- ==================== SCRIPT CHUYỂN SANG LOADING ==================== -->
+<script>
+/* CHỈ NHẢY SANG LOADING 1 LẦN */
+if (!sessionStorage.getItem("fromLoading")) {
+    sessionStorage.setItem("fromLoading", "1");
+    setTimeout(() => {
+        window.location.replace("loading.html");
+    }, 300); // 300ms delay trước khi hiển thị loading
+}
+</script>
+
 <!-- CSS -->
-  <link rel="stylesheet" href="botstyle.css">
+  <link rel="stylesheet" href="botstartstyle.css">
 </head>
 <body>
 
-<!-- LOGIN -->
+<div id="maintOverlay" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.75);
+backdrop-filter:blur(6px);
+z-index:9999;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+text-align:center;
+padding:20px;
+">
 
-<div class="login" id="loginBox">
+<div style="
+background:#101827;
+padding:30px;
+border-radius:25px;
+border:1px solid rgba(255,255,255,0.05);
+max-width:350px;
+width:100%;
+">
 
-<div class="logo">
-🤖
+<div style="
+font-size:55px;
+margin-bottom:15px;
+">
+🛠
 </div>
 
-<h2>BOT KEY VIP</h2>
+<h2 style="
+margin-bottom:10px;
+">
+BOT ĐANG BẢO TRÌ
+</h2>
 
-<input id="user" placeholder="Username">
-
-<input id="pass" type="password" placeholder="Password">
-
-<div class="rememberBox">
-    <input type="checkbox" id="remember">
-    <label for="remember">
-        Ghi nhớ đăng nhập
-    </label>
+<div style="
+color:#9ca3af;
+line-height:1.6;
+margin-top:8px;
+">
+Vui lòng quay lại sau
 </div>
 
-<button onclick="login()">
-Đăng nhập
-</button>
+<div id="maintTime" style="
+margin-top:12px;
+font-size:18px;
+font-weight:700;
+color:#00bfff;
+">
+⏳ Đang tải...
+</div>
+
+<div
+onclick="location.reload()"
+style="
+margin-top:18px;
+display:inline-block;
+padding:12px 22px;
+border-radius:14px;
+background:linear-gradient(45deg,#00bfff,#0066ff);
+font-weight:700;
+cursor:pointer;
+transition:.2s;
+">
+
+🔄 TẢI LẠI TRANG
 
 </div>
 
-<!-- CHAT -->
+<div
+onclick="window.open('Link video.html','_blank')"
+style="
+margin-top:12px;
+display:inline-block;
+padding:12px 22px;
+border-radius:14px;
+background:linear-gradient(45deg,#22c55e,#16a34a);
+font-weight:700;
+cursor:pointer;
+">
 
-<div class="chat" id="chatBox">
+🎬 TRANG PHIM
 
-<!-- TOP -->
+</div>
+
+</div>
+
+</div>
+
+<div class="chat">
 
 <div class="top">
 
-<div class="topLeft">
-
 <div class="avatar">
-<img
-id="botAvatar"
-src="https://i.imgur.com/Z7AzH2c.jpg">
+<img src="https://i.imgur.com/Z7AzH2c.jpg">
 </div>
 
 <div>
-<b>BOT KEY VIP</b><br>
+<b>BOT START KEY</b><br>
 <small id="statusText">🟢 Online</small>
 </div>
 
 </div>
 
-<button
-class="logoutBtn"
-onclick="logout()">
-Đăng xuất
-</button>
+<!-- COMMAND BUTTON -->
+
+<div class="cmds">
+
+<div class="cmdBtn"
+onclick="autoStart()">
+/start
+</div>
+
+<div class="cmdBtn"
+onclick="location.href='Link video.html'">
+🎬 Trang Phim
+</div>
 
 </div>
 
-<!-- COMMANDS -->
-
-<div class="cmds" id="cmds"></div>
-
-<!-- MESSAGES -->
-
 <div class="messages" id="messages"></div>
-
-<!-- INPUT -->
 
 <div class="inputBox">
 
-<input id="msg" placeholder="Nhập lệnh...">
+<input id="msg" placeholder="Nhập key...">
 
 <button onclick="send()">
 Gửi
@@ -94,215 +163,76 @@ Gửi
 
 <script>
 
-// ===== API =====
 const API =
-"https://bot-api2.abcd1601ab.workers.dev/";
+"https://bot-api.abcd1601ab.workers.dev/";
 
-const loginBox = document.getElementById("loginBox");
-const chatBox = document.getElementById("chatBox");
-const messages = document.getElementById("messages");
-const cmds = document.getElementById("cmds");
-const msg = document.getElementById("msg");
-const user = document.getElementById("user");
-const pass = document.getElementById("pass");
-const remember = document.getElementById("remember");
-const statusText = document.getElementById("statusText");
-
-// ROLE
-let role = "user";
+let maintenance = false;
 
 async function loadMaintenance(){
 
-  let res = await fetch(API,{
-    method:"POST",
-    body:JSON.stringify({
-      action:"getMaintenance"
-    })
-  });
-
-  let data = await res.json();
-
-  let now = Date.now();
-
-  // Tự bật nếu đến giờ hẹn
-  if(
-    !data.maintenance &&
-    Number(data.scheduledStart) > 0 &&
-    now >= Number(data.scheduledStart)
-  ){
-
-    await fetch(API,{
-      method:"POST",
-      body:JSON.stringify({
-        action:"setMaintenance",
-        maintenance:true,
-        maintenanceUntil:
-          Number(data.scheduledStart) +
-          Number(data.scheduledDuration) * 3600000
-      })
+    let res = await fetch(API,{
+        method:"POST",
+        body:JSON.stringify({
+            action:"getMaintenance"
+        })
     });
 
-    return loadMaintenance();
-  }
+    let data = await res.json();
 
-  // Tự tắt khi hết giờ
-  if(
-    data.maintenance &&
-    Number(data.maintenanceUntil) > 0 &&
-    now >= Number(data.maintenanceUntil)
-  ){
+    maintenance = data.maintenance;
 
-    await fetch(API,{
-      method:"POST",
-      body:JSON.stringify({
-        action:"setMaintenance",
-        maintenance:false,
-        maintenanceUntil:0
-      })
-    });
+    if(data.maintenanceUntil){
 
-    return loadMaintenance();
-  }
+    const end = Number(data.maintenanceUntil);
 
-  maintenance = data.maintenance;
+    clearInterval(window.maintTimer);
 
-  statusText.innerHTML =
-  maintenance
-  ? "🛠 Đang bảo trì"
-  : "🟢 Online";
-}
+    window.maintTimer = setInterval(()=>{
 
-// TỰ ĐỘNG ĐIỀN TÀI KHOẢN ĐÃ LƯU
-window.addEventListener("load",()=>{
+        const diff = end - Date.now();
 
-const savedUser =
-localStorage.getItem("savedUser");
+        if(diff <= 0){
 
-const savedPass =
-localStorage.getItem("savedPass");
+            maintTime.innerHTML =
+            "✅ Đã kết thúc bảo trì";
 
-if(savedUser){
-user.value = savedUser;
-}
+            clearInterval(window.maintTimer);
 
-if(savedPass){
-pass.value = savedPass;
-remember.checked = true;
-}
+            return;
+        }
 
-});
+        const hours =
+        Math.floor(diff / 3600000);
 
-window.addEventListener(
-"load",
-async ()=>{
+        const mins =
+        Math.floor((diff % 3600000) / 60000);
 
-const token =
-localStorage.getItem(
-"sessionToken"
-);
+        const secs =
+        Math.floor((diff % 60000) / 1000);
 
-if(!token) return;
-
-let res =
-await fetch(API,{
-method:"POST",
-body:JSON.stringify({
-action:"checkToken",
-token
-})
-});
-
-let data =
-await res.json();
-
-if(data.status=="success"){
-
-role = data.role;
-
-loginBox.style.display =
-"none";
-
-chatBox.style.display =
-"flex";
-
-addMsg(
-`✨ Xin chào <b>${data.username}</b>`,
-"bot"
-);
-
-if(role=="admin"){
-
-cmds.innerHTML=`
-
-<div class="cmdBtn"
-onclick="autoAdd()">
-/add
-</div>
-
-<div class="cmdBtn"
-onclick="autoMaint()">
-🛠 Bảo trì
-</div>
-
-<div class="cmdBtn"
-onclick="autoScheduleMaint()">
-⏰ Hẹn giờ
-</div>
-
-`;
-
-}else{
-
-cmds.innerHTML=`
-
-<div class="cmdBtn"
-onclick="autoStart()">
-/start
-</div>
-
-`;
+        maintTime.innerHTML =
+       `⏳ ${hours}h ${mins}m ${secs}s`;
+    },1000);
 
 }
+    statusText.innerHTML =
+        maintenance
+        ? "🛠 Đang bảo trì"
+        : "🟢 Online";
 
+    if(maintenance){
+        document.querySelector(".chat").style.display = "none";
+        maintOverlay.style.display = "flex";
+    }else{
+        document.querySelector(".chat").style.display = "flex";
+        maintOverlay.style.display = "none";
+    }
 }
 
-});
+loadMaintenance();
 
-// MAINTENANCE
-let maintenance = false;
+setInterval(loadMaintenance,30000);
 
-if(maintenance){
-statusText.innerHTML =
-"🛠 Đang bảo trì";
-}
-
-// ENTER LOGIN
-[user, pass].forEach(input => {
-
-input.addEventListener(
-"keypress",
-function(e){
-
-if(e.key === "Enter"){
-login();
-}
-
-});
-
-});
-
-// ENTER SEND CHAT
-msg.addEventListener(
-"keypress",
-function(e){
-
-if(e.key === "Enter"){
-send();
-}
-
-});
-
-// ADD MESSAGE
 function addMsg(text,type){
 
 let div =
@@ -319,229 +249,34 @@ messages.scrollTop =
 messages.scrollHeight;
 }
 
-// RANDOM KEY
-function randomKey(length = 16){
-
-let chars =
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-let result = "";
-
-for(let i=0;i<length;i++){
-
-result += chars.charAt(
-Math.floor(
-Math.random() * chars.length
-)
-);
-
-}
-
-return result;
-}
-
-function copyKey(key){
-
-navigator.clipboard.writeText(key);
-
-addMsg(`
-✅ Đã copy key:<br><br>
-
-<code>${key}</code>
-`,"bot");
-
-}
-
-// LOGIN
-async function login(){
-
-let username =
-user.value.trim();
-
-let password =
-pass.value.trim();
-
-let res =
-await fetch(API,{
-method:"POST",
-body:JSON.stringify({
-action:"login",
-username,
-password
-})
-});
-
-let data =
-await res.json();
-
-if(data.status=="success"){
-
-localStorage.setItem(
-"sessionToken",
-data.token
-);
-
-if(remember.checked){
-
-localStorage.setItem(
-"savedUser",
-username
-);
-
-localStorage.setItem(
-"savedPass",
-password
-);
-
-}else{
-
-localStorage.removeItem(
-"savedUser"
-);
-
-localStorage.removeItem(
-"savedPass"
-);
-
-}
-
-role = data.role;
-
-loginBox.style.display =
-"none";
-
-chatBox.style.display =
-"flex";
-
-addMsg(`
-✨ Xin chào <b>${username}</b>
-`,"bot");
-
-// ADMIN
-if(role=="admin"){
-
-cmds.innerHTML=`
-
-<div class="cmdBtn"
-onclick="autoAdd()">
-➕ Tạo Key
-</div>
-
-<div class="cmdBtn"
-onclick="autoMaint()">
-🛠 Bảo trì
-</div>
-
-<div class="cmdBtn"
-onclick="autoScheduleMaint()">
-⏰ Hẹn giờ
-</div>
-
-`;
-
-addMsg(`
-
-<div class="admin">
-
-👑 ADMIN MODE<br><br>
-
-Tạo key:<br>
-<code>/add LINK 24</code><br><br>
-
-Ví dụ:<br>
-<code>/add https://google.com 24</code><br><br>
-
-Key vĩnh viễn:<br>
-<code>/add https://google.com</code>
-
-</div>
-
-`,"bot");
-
-}
-
-// USER
-else{
-
-cmds.innerHTML=`
-
-<div class="cmdBtn"
-onclick="autoStart()">
-/start
-</div>
-
-`;
-
-addMsg(`
-🔑 Nhập key bằng lệnh:<br><br>
-
-<code>/start KEY</code>
-`,"bot");
-
-}
-
-}else{
-
-alert("Sai tài khoản");
-
-}
-
-}
-
-// AUTO
-function autoAdd(){
-
-msg.value="/add ";
-
-msg.focus();
-}
-
-function autoMaint(){
-
-  msg.value="/maint ";
-
-  msg.focus();
-
-}
-
-function autoScheduleMaint(){
-
-msg.value="/schedulemaint ";
-
-msg.focus();
-
-}
+/* AUTO START */
 
 function autoStart(){
 
 msg.value="/start ";
 
 msg.focus();
+
 }
 
-async function toggleMaintenance(){
+msg.addEventListener(
+"keypress",
+function(e){
 
-maintenance = !maintenance;
+if(e.key==="Enter"){
+send();
+}
 
-await fetch(API,{
-method:"POST",
-body:JSON.stringify({
-action:"setMaintenance",
-maintenance,
-maintenanceUntil:0
-})
 });
 
-await loadMaintenance();
-
 addMsg(`
-🛠 Chế độ bảo trì:
-<b>${maintenance ? "BẬT" : "TẮT"}</b>
+✨ Xin chào<br><br>
+
+Nhập key bằng lệnh:<br><br>
+
+<code>/start KEY</code>
 `,"bot");
 
-}
-
-// SEND
 async function send(){
 
 let text =
@@ -553,268 +288,6 @@ addMsg(text,"user");
 
 msg.value="";
 
-// ===== ADD =====
-if(text.startsWith("/add")){
-
-if(role!="admin"){
-
-addMsg(`
-❌ Bạn không phải admin
-`,"bot");
-
-return;
-}
-
-let parts =
-text.split(" ");
-
-if(parts.length < 2){
-
-addMsg(`
-❌ Sai cú pháp<br><br>
-
-<code>/add LINK 24</code>
-`,"bot");
-
-return;
-}
-
-let link = parts[1];
-
-let hours =
-Number(parts[2]);
-
-let key =
-randomKey();
-
-let expireDate;
-
-// VĨNH VIỄN
-if(!parts[2]){
-
-expireDate = "never";
-
-}
-
-// CÓ GIỜ
-else{
-
-expireDate =
-new Date();
-
-expireDate.setHours(
-expireDate.getHours() + hours
-);
-
-}
-
-await Promise.all([
-
-fetch("https://bot-api2.abcd1601ab.workers.dev/",{
-method:"POST",
-body:JSON.stringify({
-action:"addKey",
-key,
-link,
-expire:expireDate
-})
-}),
-
-fetch("https://bot-api3.abcd1601ab.workers.dev/",{
-method:"POST",
-body:JSON.stringify({
-action:"addKey",
-key,
-link,
-expire:expireDate
-})
-})
-
-]);
-
-addMsg(`
-
-<div class="admin">
-
-✅ TẠO KEY THÀNH CÔNG<br><br>
-
-🔑 KEY:<br>
-
-<div style="
-display:flex;
-align-items:center;
-gap:10px;
-margin-top:8px;
-margin-bottom:15px;
-">
-
-<code id="key_${key}">
-${key}
-</code>
-
-<button
-onclick="copyKey('${key}')"
-style="
-padding:8px 14px;
-border:none;
-border-radius:10px;
-background:linear-gradient(45deg,#00ff99,#00bfff);
-color:#08111f;
-font-weight:700;
-cursor:pointer;
-">
-📋 Copy
-</button>
-
-</div>
-
-🌐 LINK:<br>
-${link}<br><br>
-
-⏰ HẾT HẠN:<br>
-${parts[2]
-? hours + " giờ"
-: "Vĩnh viễn"}
-
-</div>
-
-`,"bot");
-
-}
-
-if(text.startsWith("/maint")){
-
-  if(role!="admin"){
-
-    addMsg("❌ Bạn không phải admin","bot");
-
-    return;
-  }
-
-  let parts = text.split(" ");
-
-  // Tắt bảo trì
-  if(parts[1] == "off"){
-
-    await fetch(API,{
-      method:"POST",
-      body:JSON.stringify({
-        action:"setMaintenance",
-        maintenance:false,
-        maintenanceUntil:0
-      })
-    });
-
-    addMsg(`
-✅ Đã tắt bảo trì
-    `,"bot");
-
-    loadMaintenance();
-
-    return;
-  }
-
-  let hours = Number(parts[1]);
-
-  if(isNaN(hours)){
-
-    addMsg(`
-❌ Cú pháp
-
-<code>/maint 2</code>
-
-Bảo trì 2 giờ
-
-<code>/maint off</code>
-
-Tắt bảo trì
-    `,"bot");
-
-    return;
-  }
-
-  await fetch(API,{
-    method:"POST",
-    body:JSON.stringify({
-      action:"setMaintenance",
-      maintenance:true,
-      maintenanceUntil:
-      Date.now() + hours*3600000
-    })
-  });
-
-  addMsg(`
-🛠 Đã bật bảo trì
-
-⏰ ${hours} giờ
-  `,"bot");
-
-  loadMaintenance();
-
-  return;
-}
-
-if(text.startsWith("/schedulemaint")){
-
-  if(role!="admin"){
-    return;
-  }
-
-  let parts = text.split(" ");
-
-  if(parts.length < 3){
-
-    addMsg(`
-❌ Cú pháp
-
-<code>/schedulemaint 23:00 2</code>
-    `,"bot");
-
-    return;
-  }
-
-  let time = parts[1];
-  let hours = Number(parts[2]);
-
-  let [h,m] = time.split(":");
-
-  let start = new Date();
-
-  start.setHours(Number(h));
-  start.setMinutes(Number(m));
-  start.setSeconds(0);
-
-  if(start.getTime() < Date.now()){
-    start.setDate(start.getDate()+1);
-  }
-
-  await fetch(API,{
-    method:"POST",
-    body:JSON.stringify({
-      action:"scheduleMaintenance",
-      start:start.getTime(),
-      duration:hours
-    })
-  });
-
-  addMsg(`
-✅ Đã hẹn bảo trì
-
-🕒 ${time}
-
-⏰ ${hours} giờ
-  `,"bot");
-
-  return;
-}
-
-// ===== START =====
-else if(
-text.startsWith("/start")
-||
-(role=="admin" && !text.startsWith("/add"))
-){
-
 if(maintenance){
 
 addMsg(`
@@ -824,17 +297,7 @@ addMsg(`
 return;
 }
 
-let key;
-
-// ADMIN gửi thẳng key
-if(role=="admin" && !text.startsWith("/start")){
-
-key = text;
-
-}
-
-// USER dùng /start
-else{
+if(text.startsWith("/start")){
 
 let parts =
 text.split(" ");
@@ -848,9 +311,8 @@ addMsg(`
 return;
 }
 
-key = parts[1];
-
-}
+let key =
+parts[1];
 
 let res =
 await fetch(API,{
@@ -893,7 +355,6 @@ font-weight:700;
 👉 MỞ LINK
 
 </a>
-
 `,"bot");
 
 }
@@ -930,49 +391,25 @@ cursor:not-allowed;
 
 else{
 
-// CHECK ĐỘ DÀI KEY
-if(text.length < 10){
-
 addMsg(`
-❌ Vui lòng nhập key hợp lệ
+❌ KEY KHÔNG TỒN TẠI
 `,"bot");
 
 }
 
 }
 
-}
+else{
+
+addMsg(`
+❌ Sai lệnh<br><br>
+
+<code>/start KEY</code>
+`,"bot");
 
 }
 
-async function logout(){
-
-const token =
-localStorage.getItem(
-"sessionToken"
-);
-
-await fetch(API,{
-method:"POST",
-body:JSON.stringify({
-action:"logout",
-token
-})
-});
-
-localStorage.removeItem(
-"sessionToken"
-);
-
-location.reload();
-
 }
-
-loadMaintenance();
-
-setInterval(()=>{
-  loadMaintenance();
-},60000);
 
 </script>
 
