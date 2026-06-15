@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOT KEY VIP</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- CSS -->
+  <link rel="stylesheet" href="botstyle.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+
+<div class="login" id="loginBox">
+
+<div class="logo">
+🤖
+</div>
+
+<h2>BOT KEY VIP</h2>
+
+<input id="user" placeholder="Username">
+
+<input id="pass" type="password" placeholder="Password">
+
+<div class="rememberBox">
+    <input type="checkbox" id="remember">
+    <label for="remember">
+        Ghi nhớ đăng nhập
+    </label>
+</div>
+
+<button onclick="login()">
+Đăng nhập
+</button>
+
+</div>
+
+<!-- CHAT -->
+
+<div class="chat" id="chatBox">
+
+<!-- TOP -->
+
+<div class="top">
+
+<div class="topLeft">
+
+<div class="avatar">
+<img
+id="botAvatar"
+src="https://i.imgur.com/Z7AzH2c.jpg">
+</div>
+
+<div>
+<b>BOT KEY VIP</b><br>
+<small id="statusText">🟢 Online</small>
+</div>
+
+</div>
+
+<button
+class="logoutBtn"
+onclick="logout()">
+Đăng xuất
+</button>
+
+</div>
+
+<!-- COMMANDS -->
+
+<div class="cmds" id="cmds"></div>
+
+<!-- MESSAGES -->
+
+<div class="messages" id="messages"></div>
+
+<!-- INPUT -->
+
+<div class="inputBox">
+
+<input id="msg" placeholder="Nhập lệnh...">
+
+<button onclick="send()">
+Gửi
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+// ===== API =====
+const API =
+"https://bot-api2.abcd1601ab.workers.dev/";
+
+const loginBox = document.getElementById("loginBox");
+const chatBox = document.getElementById("chatBox");
+const messages = document.getElementById("messages");
+const cmds = document.getElementById("cmds");
+const msg = document.getElementById("msg");
+const user = document.getElementById("user");
+const pass = document.getElementById("pass");
+const remember = document.getElementById("remember");
+const statusText = document.getElementById("statusText");
+
+// ROLE
+let role = "user";
+
+async function loadMaintenance(){
+
+  let res = await fetch(API,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"getMaintenance"
+    })
+  });
+
+  let data = await res.json();
+
+  let now = Date.now();
+
+  // Tự bật nếu đến giờ hẹn
+  if(
+    !data.maintenance &&
+    Number(data.scheduledStart) > 0 &&
+    now >= Number(data.scheduledStart)
+  ){
+
+    await fetch(API,{
+      method:"POST",
+      body:JSON.stringify({
+        action:"setMaintenance",
+        maintenance:true,
+        maintenanceUntil:
+          Number(data.scheduledStart) +
+          Number(data.scheduledDuration) * 3600000
+      })
+    });
+
+    return loadMaintenance();
+  }
+
+  // Tự tắt khi hết giờ
+  if(
+    data.maintenance &&
+    Number(data.maintenanceUntil) > 0 &&
+    now >= Number(data.maintenanceUntil)
+  ){
+
+    await fetch(API,{
+      method:"POST",
+      body:JSON.stringify({
+        action:"setMaintenance",
+        maintenance:false,
+        maintenanceUntil:0
+      })
+    });
+
+    return loadMaintenance();
+  }
+
+  maintenance = data.maintenance;
+
+  statusText.innerHTML =
+  maintenance
+  ? "🛠 Đang bảo trì"
+  : "🟢 Online";
+}
+
+// TỰ ĐỘNG ĐIỀN TÀI KHOẢN ĐÃ LƯU
+window.addEventListener("load",()=>{
+
+const savedUser =
+localStorage.getItem("savedUser");
+
+const savedPass =
+localStorage.getItem("savedPass");
+
+if(savedUser){
+user.value = savedUser;
+}
+
+if(savedPass){
+pass.value = savedPass;
+remember.checked = true;
+}
+
+});
+
+window.addEventListener(
+"load",
+async ()=>{
+
+const token =
+localStorage.getItem(
+"sessionToken"
+);
+
+if(!token) return;
+
+let res =
+await fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"checkToken",
+token
+})
+});
+
+let data =
+await res.json();
+
+if(data.status=="success"){
+
+role = data.role;
+
+loginBox.style.display =
+"none";
+
+chatBox.style.display =
+"flex";
+
+addMsg(
+`✨ Xin chào <b>${data.username}</b>`,
+"bot"
+);
+
+if(role=="admin"){
+
+cmds.innerHTML=`
+
+<div class="cmdBtn"
+onclick="autoAdd()">
+/add
+</div>
+
+<div class="cmdBtn"
+onclick="autoMaint()">
+🛠 Bảo trì
+</div>
+
+<div class="cmdBtn"
+onclick="autoScheduleMaint()">
+⏰ Hẹn giờ
+</div>
+
+`;
+
+}else{
+
+cmds.innerHTML=`
+
+<div class="cmdBtn"
+onclick="autoStart()">
+/start
+</div>
+
+`;
+
+}
+
+}
+
+});
+
+// MAINTENANCE
+let maintenance = false;
+
+if(maintenance){
+statusText.innerHTML =
+"🛠 Đang bảo trì";
+}
+
+// ENTER LOGIN
+[user, pass].forEach(input => {
+
+input.addEventListener(
+"keypress",
+function(e){
+
+if(e.key === "Enter"){
+login();
+}
+
+});
+
+});
+
+// ENTER SEND CHAT
+msg.addEventListener(
+"keypress",
+function(e){
+
+if(e.key === "Enter"){
+send();
+}
+
+});
+
+// ADD MESSAGE
+function addMsg(text,type){
+
+let div =
+document.createElement("div");
+
+div.className =
+"msg " + type;
+
+div.innerHTML = text;
+
+messages.appendChild(div);
+
+messages.scrollTop =
+messages.scrollHeight;
+}
+
+// RANDOM KEY
+function randomKey(length = 16){
+
+let chars =
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+let result = "";
+
+for(let i=0;i<length;i++){
+
+result += chars.charAt(
+Math.floor(
+Math.random() * chars.length
+)
+);
+
+}
+
+return result;
+}
+
+function copyKey(key){
+
+navigator.clipboard.writeText(key);
+
+addMsg(`
+✅ Đã copy key:<br><br>
+
+<code>${key}</code>
+`,"bot");
+
+}
+
+// LOGIN
+async function login(){
+
+let username =
+user.value.trim();
+
+let password =
+pass.value.trim();
+
+let res =
+await fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"login",
+username,
+password
+})
+});
+
+let data =
+await res.json();
+
+if(data.status=="success"){
+
+localStorage.setItem(
+"sessionToken",
+data.token
+);
+
+if(remember.checked){
+
+localStorage.setItem(
+"savedUser",
+username
+);
+
+localStorage.setItem(
+"savedPass",
+password
+);
+
+}else{
+
+localStorage.removeItem(
+"savedUser"
+);
+
+localStorage.removeItem(
+"savedPass"
+);
+
+}
+
+role = data.role;
+
+loginBox.style.display =
+"none";
+
+chatBox.style.display =
+"flex";
+
+addMsg(`
+✨ Xin chào <b>${username}</b>
+`,"bot");
+
+// ADMIN
+if(role=="admin"){
+
+cmds.innerHTML=`
+
+<div class="cmdBtn"
+onclick="autoAdd()">
+➕ Tạo Key
+</div>
+
+<div class="cmdBtn"
+onclick="autoMaint()">
+🛠 Bảo trì
+</div>
+
+<div class="cmdBtn"
+onclick="autoScheduleMaint()">
+⏰ Hẹn giờ
+</div>
+
+`;
+
+addMsg(`
+
+<div class="admin">
+
+👑 ADMIN MODE<br><br>
+
+Tạo key:<br>
+<code>/add LINK 24</code><br><br>
+
+Ví dụ:<br>
+<code>/add https://google.com 24</code><br><br>
+
+Key vĩnh viễn:<br>
+<code>/add https://google.com</code>
+
+</div>
+
+`,"bot");
+
+}
+
+// USER
+else{
+
+cmds.innerHTML=`
+
+<div class="cmdBtn"
+onclick="autoStart()">
+/start
+</div>
+
+`;
+
+addMsg(`
+🔑 Nhập key bằng lệnh:<br><br>
+
+<code>/start KEY</code>
+`,"bot");
+
+}
+
+}else{
+
+alert("Sai tài khoản");
+
+}
+
+}
+
+// AUTO
+function autoAdd(){
+
+msg.value="/add ";
+
+msg.focus();
+}
+
+function autoMaint(){
+
+  msg.value="/maint ";
+
+  msg.focus();
+
+}
+
+function autoScheduleMaint(){
+
+msg.value="/schedulemaint ";
+
+msg.focus();
+
+}
+
+function autoStart(){
+
+msg.value="/start ";
+
+msg.focus();
+}
+
+async function toggleMaintenance(){
+
+maintenance = !maintenance;
+
+await fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"setMaintenance",
+maintenance,
+maintenanceUntil:0
+})
+});
+
+await loadMaintenance();
+
+addMsg(`
+🛠 Chế độ bảo trì:
+<b>${maintenance ? "BẬT" : "TẮT"}</b>
+`,"bot");
+
+}
+
+// SEND
+async function send(){
+
+let text =
+msg.value.trim();
+
+if(text=="") return;
+
+addMsg(text,"user");
+
+msg.value="";
+
+// ===== ADD =====
+if(text.startsWith("/add")){
+
+if(role!="admin"){
+
+addMsg(`
+❌ Bạn không phải admin
+`,"bot");
+
+return;
+}
+
+let parts =
+text.split(" ");
+
+if(parts.length < 2){
+
+addMsg(`
+❌ Sai cú pháp<br><br>
+
+<code>/add LINK 24</code>
+`,"bot");
+
+return;
+}
+
+let link = parts[1];
+
+let hours =
+Number(parts[2]);
+
+let key =
+randomKey();
+
+let expireDate;
+
+// VĨNH VIỄN
+if(!parts[2]){
+
+expireDate = "never";
+
+}
+
+// CÓ GIỜ
+else{
+
+expireDate =
+new Date();
+
+expireDate.setHours(
+expireDate.getHours() + hours
+);
+
+}
+
+await Promise.all([
+
+fetch("https://bot-api2.abcd1601ab.workers.dev/",{
+method:"POST",
+body:JSON.stringify({
+action:"addKey",
+key,
+link,
+expire:expireDate
+})
+}),
+
+fetch("https://bot-api3.abcd1601ab.workers.dev/",{
+method:"POST",
+body:JSON.stringify({
+action:"addKey",
+key,
+link,
+expire:expireDate
+})
+})
+
+]);
+
+addMsg(`
+
+<div class="admin">
+
+✅ TẠO KEY THÀNH CÔNG<br><br>
+
+🔑 KEY:<br>
+
+<div style="
+display:flex;
+align-items:center;
+gap:10px;
+margin-top:8px;
+margin-bottom:15px;
+">
+
+<code id="key_${key}">
+${key}
+</code>
+
+<button
+onclick="copyKey('${key}')"
+style="
+padding:8px 14px;
+border:none;
+border-radius:10px;
+background:linear-gradient(45deg,#00ff99,#00bfff);
+color:#08111f;
+font-weight:700;
+cursor:pointer;
+">
+📋 Copy
+</button>
+
+</div>
+
+🌐 LINK:<br>
+${link}<br><br>
+
+⏰ HẾT HẠN:<br>
+${parts[2]
+? hours + " giờ"
+: "Vĩnh viễn"}
+
+</div>
+
+`,"bot");
+
+}
+
+if(text.startsWith("/maint")){
+
+  if(role!="admin"){
+
+    addMsg("❌ Bạn không phải admin","bot");
+
+    return;
+  }
+
+  let parts = text.split(" ");
+
+  // Tắt bảo trì
+  if(parts[1] == "off"){
+
+    await fetch(API,{
+      method:"POST",
+      body:JSON.stringify({
+        action:"setMaintenance",
+        maintenance:false,
+        maintenanceUntil:0
+      })
+    });
+
+    addMsg(`
+✅ Đã tắt bảo trì
+    `,"bot");
+
+    loadMaintenance();
+
+    return;
+  }
+
+  let hours = Number(parts[1]);
+
+  if(isNaN(hours)){
+
+    addMsg(`
+❌ Cú pháp
+
+<code>/maint 2</code>
+
+Bảo trì 2 giờ
+
+<code>/maint off</code>
+
+Tắt bảo trì
+    `,"bot");
+
+    return;
+  }
+
+  await fetch(API,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"setMaintenance",
+      maintenance:true,
+      maintenanceUntil:
+      Date.now() + hours*3600000
+    })
+  });
+
+  addMsg(`
+🛠 Đã bật bảo trì
+
+⏰ ${hours} giờ
+  `,"bot");
+
+  loadMaintenance();
+
+  return;
+}
+
+if(text.startsWith("/schedulemaint")){
+
+  if(role!="admin"){
+    return;
+  }
+
+  let parts = text.split(" ");
+
+  if(parts.length < 3){
+
+    addMsg(`
+❌ Cú pháp
+
+<code>/schedulemaint 23:00 2</code>
+    `,"bot");
+
+    return;
+  }
+
+  let time = parts[1];
+  let hours = Number(parts[2]);
+
+  let [h,m] = time.split(":");
+
+  let start = new Date();
+
+  start.setHours(Number(h));
+  start.setMinutes(Number(m));
+  start.setSeconds(0);
+
+  if(start.getTime() < Date.now()){
+    start.setDate(start.getDate()+1);
+  }
+
+  await fetch(API,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"scheduleMaintenance",
+      start:start.getTime(),
+      duration:hours
+    })
+  });
+
+  addMsg(`
+✅ Đã hẹn bảo trì
+
+🕒 ${time}
+
+⏰ ${hours} giờ
+  `,"bot");
+
+  return;
+}
+
+// ===== START =====
+else if(
+text.startsWith("/start")
+||
+(role=="admin" && !text.startsWith("/add"))
+){
+
+if(maintenance){
+
+addMsg(`
+🛠 BOT ĐANG BẢO TRÌ
+`,"bot");
+
+return;
+}
+
+let key;
+
+// ADMIN gửi thẳng key
+if(role=="admin" && !text.startsWith("/start")){
+
+key = text;
+
+}
+
+// USER dùng /start
+else{
+
+let parts =
+text.split(" ");
+
+if(parts.length < 2){
+
+addMsg(`
+❌ Vui lòng nhập key
+`,"bot");
+
+return;
+}
+
+key = parts[1];
+
+}
+
+let res =
+await fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"getKey",
+key
+})
+});
+
+let data =
+await res.json();
+
+if(data.status=="found"){
+
+addMsg(`
+
+✅ KEY HỢP LỆ<br><br>
+
+🔑 <b>${key}</b><br><br>
+
+⏰ ${
+data.expire=="never"
+? "Vĩnh viễn"
+: new Date(data.expire)
+.toLocaleString("vi-VN")
+}<br><br>
+
+<a href="${data.link}"
+target="_blank"
+style="
+display:inline-block;
+padding:12px 18px;
+background:linear-gradient(45deg,#00ff99,#00bfff);
+border-radius:12px;
+color:#08111f;
+font-weight:700;
+">
+
+👉 MỞ LINK
+
+</a>
+
+`,"bot");
+
+}
+
+else if(data.status=="expired"){
+
+addMsg(`
+
+<div style="color:#ff6b6b;">
+
+❌ KEY ĐÃ HẾT HẠN<br><br>
+
+🔑 <b>${key}</b><br><br>
+
+<div style="
+background:#3a1111;
+padding:12px;
+border-radius:12px;
+text-align:center;
+font-weight:bold;
+color:#ff4d4d;
+cursor:not-allowed;
+">
+
+🚫 LINK ĐÃ KHÓA
+
+</div>
+
+</div>
+
+`,"bot");
+
+}
+
+else{
+
+// CHECK ĐỘ DÀI KEY
+if(text.length < 10){
+
+addMsg(`
+❌ Vui lòng nhập key hợp lệ
+`,"bot");
+
+}
+
+}
+
+}
+
+}
+
+async function logout(){
+
+const token =
+localStorage.getItem(
+"sessionToken"
+);
+
+await fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"logout",
+token
+})
+});
+
+localStorage.removeItem(
+"sessionToken"
+);
+
+location.reload();
+
+}
+
+loadMaintenance();
+
+setInterval(()=>{
+  loadMaintenance();
+},60000);
+
+</script>
+
+</body>
+</html>

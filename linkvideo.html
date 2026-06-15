@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nhận Key Xem Video</title>
+
+<!-- CSS -->
+  <link rel="stylesheet" href="linkvideostyle.css">
+</head>
+<body>
+    
+<div class="container">
+
+    <h1>📺 Danh Sách Video VIP</h1>
+
+    <div id="videoList">
+        <div class="loading">⏳ Đang tải danh sách video...</div>
+    </div>
+
+    <a href="Bot%20start.html" class="login-btn">
+        🔑 Đã Có Key? Nhập Key Tại Đây
+    </a>
+
+</div>
+
+<script>
+
+function loadVideos(){
+
+    fetch(
+      "https://bot-api3.abcd1601ab.workers.dev/?type=video&secret=BOT_VIDEO"
+    )
+    .then(res => res.json())
+    .then(videos => {
+
+        console.log(videos);
+
+        let html = "";
+
+        videos.forEach(video => {
+
+            html += `
+            <div class="video">
+                <span>${video.ten}</span>
+
+                <a class="btn key-btn"
+                   href="nhankey.html?id=${video.id}">
+                   🔑 Nhận Key
+                </a>
+            </div>
+            `;
+
+        });
+
+        document.getElementById("videoList").innerHTML = html;
+
+    })
+    .catch(error => {
+
+        console.error(error);
+
+        document.getElementById("videoList").innerHTML =
+        '<div class="loading">❌ Không tải được danh sách video</div>';
+
+    });
+
+}
+
+// Tải lần đầu
+loadVideos();
+
+// Tự động tải lại mỗi 10 giây
+setInterval(loadVideos, 10000);
+
+</script>
+
+</body>
+</html>
