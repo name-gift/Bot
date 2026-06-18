@@ -26,6 +26,8 @@
 
 <script>
 
+const PAGE = 2; // Trang 2
+
 function loadVideos(){
 
     fetch(
@@ -34,11 +36,16 @@ function loadVideos(){
     .then(res => res.json())
     .then(videos => {
 
-        console.log(videos);
-
         let html = "";
 
-        videos.forEach(video => {
+        const perPage = 6;
+
+        const start = (PAGE - 1) * perPage;
+        const end = start + perPage;
+
+        const pageVideos = videos.slice(start, end);
+
+        pageVideos.forEach(video => {
 
             html += `
             <div class="video">
@@ -53,24 +60,21 @@ function loadVideos(){
 
         });
 
+        html += `
+        <div style="text-align:center;margin-top:20px;">
+            <a href="linkvideo.html" class="btn key-btn">
+                ⬅ Trang 1
+            </a>
+        </div>
+        `;
+
         document.getElementById("videoList").innerHTML = html;
-
-    })
-    .catch(error => {
-
-        console.error(error);
-
-        document.getElementById("videoList").innerHTML =
-        '<div class="loading">❌ Không tải được danh sách video</div>';
 
     });
 
 }
 
-// Tải lần đầu
 loadVideos();
-
-// Tự động tải lại mỗi 10 giây
 setInterval(loadVideos, 10000);
 
 </script>
