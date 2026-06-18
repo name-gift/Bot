@@ -26,7 +26,8 @@
 
 <script>
 
-const PAGE = 2; // Trang 2
+const urlParams = new URLSearchParams(location.search);
+const page = Number(urlParams.get("page")) || 1;
 
 function loadVideos(){
 
@@ -36,14 +37,14 @@ function loadVideos(){
     .then(res => res.json())
     .then(videos => {
 
-        let html = "";
-
         const perPage = 6;
 
-        const start = (PAGE - 1) * perPage;
+        const start = (page - 1) * perPage;
         const end = start + perPage;
 
         const pageVideos = videos.slice(start, end);
+
+        let html = "";
 
         pageVideos.forEach(video => {
 
@@ -60,22 +61,49 @@ function loadVideos(){
 
         });
 
+        const totalPages =
+        Math.ceil(videos.length / perPage);
+
         html += `
-        <div style="text-align:center;margin-top:20px;">
-            <a href="linkvideo.html" class="btn key-btn">
-                ⬅ Trang 1
-            </a>
+        <div class="pagination">
+
+            ${
+              page > 1
+              ? `<a class="page-btn" href="?page=${page-1}">
+                   ⬅ Trang trước
+                 </a>`
+              : ""
+            }
+
+            <span class="page-info">
+              Trang ${page}/${totalPages}
+            </span>
+
+            ${
+              page < totalPages
+              ? `<a class="page-btn" href="?page=${page+1}">
+                   Trang sau ➡
+                 </a>`
+              : ""
+            }
+
         </div>
         `;
 
         document.getElementById("videoList").innerHTML = html;
+
+    })
+    .catch(error => {
+
+        document.getElementById("videoList").innerHTML =
+        '<div class="loading">❌ Không tải được danh sách video</div>';
 
     });
 
 }
 
 loadVideos();
-setInterval(loadVideos, 10000);
+setInterval(loadVideos,10000);
 
 </script>
 
