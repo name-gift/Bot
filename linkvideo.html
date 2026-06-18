@@ -62,34 +62,123 @@ function loadVideos(){
         });
 
         const totalPages =
-        Math.ceil(videos.length / perPage);
+Math.ceil(videos.length / perPage);
 
-        html += `
-        <div class="pagination">
+html += `<div class="pagination">`;
 
-            ${
-              page > 1
-              ? `<a class="page-btn" href="?page=${page-1}">
-                   ⬅ Trang trước
-                 </a>`
-              : ""
+html += `
+<a href="?page=1"
+class="page-btn ${page===1?'active':''}">
+1
+</a>
+`;
+
+if(totalPages > 1){
+
+    if(totalPages <= 7){
+
+        for(let i=2;i<=totalPages;i++){
+
+            html += `
+            <a href="?page=${i}"
+            class="page-btn ${page===i?'active':''}">
+            ${i}
+            </a>
+            `;
+        }
+
+    }else{
+
+        if(page <= 4){
+
+            for(let i=2;i<=5;i++){
+
+                html += `
+                <a href="?page=${i}"
+                class="page-btn ${page===i?'active':''}">
+                ${i}
+                </a>
+                `;
             }
 
-            <span class="page-info">
-              Trang ${page}/${totalPages}
-            </span>
+            html += `
+            <span class="dots">...</span>
+            `;
 
-            ${
-              page < totalPages
-              ? `<a class="page-btn" href="?page=${page+1}">
-                   Trang sau ➡
-                 </a>`
-              : ""
+            html += `
+            <a href="?page=${totalPages}"
+            class="page-btn">
+            ${totalPages}
+            </a>
+            `;
+
+        }else if(page >= totalPages - 3){
+
+            html += `
+            <span class="dots">...</span>
+            `;
+
+            for(let i=totalPages-4;i<=totalPages;i++){
+
+                html += `
+                <a href="?page=${i}"
+                class="page-btn ${page===i?'active':''}">
+                ${i}
+                </a>
+                `;
             }
 
-        </div>
-        `;
+        }else{
 
+            html += `
+            <span class="dots">...</span>
+            `;
+
+            for(let i=page-1;i<=page+1;i++){
+
+                html += `
+                <a href="?page=${i}"
+                class="page-btn ${page===i?'active':''}">
+                ${i}
+                </a>
+                `;
+            }
+
+            html += `
+            <span class="dots">...</span>
+            `;
+
+            html += `
+            <a href="?page=${totalPages}"
+            class="page-btn">
+            ${totalPages}
+            </a>
+            `;
+        }
+    }
+}
+
+html += `
+</div>
+
+<div class="goto-box">
+
+    <input
+      id="gotoInput"
+      type="number"
+      min="1"
+      max="${totalPages}"
+      value="${page}"
+    >
+
+    <span>/ ${totalPages}</span>
+
+    <button onclick="gotoPage()">
+      Đi đến
+    </button>
+
+</div>
+`;
         document.getElementById("videoList").innerHTML = html;
 
     })
@@ -103,6 +192,18 @@ function loadVideos(){
 }
 
 loadVideos();
+function gotoPage(){
+
+    const p =
+    document.getElementById(
+      "gotoInput"
+    ).value;
+
+    if(!p) return;
+
+    location.href =
+    "?page=" + p;
+}
 setInterval(loadVideos,10000);
 
 </script>
