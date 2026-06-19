@@ -77,6 +77,10 @@ async function loadStats(){
 
 data.latest.forEach(item => {
 
+keyList.innerHTML = "";
+
+data.latest.forEach(item => {
+
   keyList.innerHTML += `
     <div class="keyItem">
       <span class="video">${item.video}</span>
@@ -92,8 +96,8 @@ data.latest.forEach(item => {
 }
 
 loadStats();
+setInterval(loadStats, 10000);
 
-setInterval(loadStats, 100000);
 
 </script>
 
