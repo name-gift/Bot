@@ -73,22 +73,28 @@ async function loadStats(){
 
   data.latest.forEach(item=>{
 
-    keyList.innerHTML += `
-  <div class="keyItem">
-    <span class="video">${item.video}</span>
-    <span class="key">${item.key}</span>
-    <span class="date">
-      ${new Date(item.expire).toLocaleDateString("vi-VN")}
-    </span>
-  </div>
-`;
+   keyList.innerHTML = "";
 
+data.latest.forEach(item => {
+
+  keyList.innerHTML += `
+    <div class="keyItem">
+      <span class="video">${item.video}</span>
+      <span class="key">${item.key}</span>
+      <span class="date">
+        ${new Date(item.expire).toLocaleDateString("vi-VN")}
+      </span>
+    </div>
+  `;
+
+});
 
 }
 
 loadStats();
 
-setInterval(loadStats,10000);
+setInterval(loadStats, 100000);
+
 </script>
 
 </body>
