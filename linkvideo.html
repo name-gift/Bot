@@ -32,24 +32,16 @@ const page = Number(urlParams.get("page")) || 1;
 function loadVideos(){
 
     fetch(
-`https://bot-api3.abcd1601ab.workers.dev/?type=video&page=${page}&limit=6&secret=BOT_VIDEO`
-)
-
+      `https://bot-api3.abcd1601ab.workers.dev/?type=video&page=${page}&limit=6&secret=BOT_VIDEO`
+    )
     .then(res => res.json())
     .then(data => {
 
-    const videos = data.videos;
-
-        const perPage = 6;
-
-        const start = (page - 1) * perPage;
-        const end = start + perPage;
-
-        const pageVideos = videos.slice(start, end);
+        const videos = data.videos || [];
 
         let html = "";
 
-        pageVideos.forEach(video => {
+        videos.forEach(video => {
 
             html += `
             <div class="video">
@@ -65,123 +57,116 @@ function loadVideos(){
         });
 
         const totalPages =
-Math.ceil(data.total / 6);
+        Math.ceil(data.total / 6);
 
-html += `<div class="pagination">`;
+        html += `<div class="pagination">`;
 
-html += `
-<a href="?page=1"
-class="page-btn ${page===1?'active':''}">
-1
-</a>
-`;
+        html += `
+        <a href="?page=1"
+        class="page-btn ${page===1?'active':''}">
+        1
+        </a>
+        `;
 
-if(totalPages > 1){
+        if(totalPages > 1){
 
-    if(totalPages <= 7){
+            if(totalPages <= 7){
 
-        for(let i=2;i<=totalPages;i++){
+                for(let i=2;i<=totalPages;i++){
 
-            html += `
-            <a href="?page=${i}"
-            class="page-btn ${page===i?'active':''}">
-            ${i}
-            </a>
-            `;
+                    html += `
+                    <a href="?page=${i}"
+                    class="page-btn ${page===i?'active':''}">
+                    ${i}
+                    </a>
+                    `;
+                }
+
+            }else{
+
+                if(page <= 4){
+
+                    for(let i=2;i<=5;i++){
+
+                        html += `
+                        <a href="?page=${i}"
+                        class="page-btn ${page===i?'active':''}">
+                        ${i}
+                        </a>
+                        `;
+                    }
+
+                    html += `<span class="dots">...</span>`;
+
+                    html += `
+                    <a href="?page=${totalPages}"
+                    class="page-btn">
+                    ${totalPages}
+                    </a>
+                    `;
+
+                }else if(page >= totalPages - 3){
+
+                    html += `<span class="dots">...</span>`;
+
+                    for(let i=totalPages-4;i<=totalPages;i++){
+
+                        html += `
+                        <a href="?page=${i}"
+                        class="page-btn ${page===i?'active':''}">
+                        ${i}
+                        </a>
+                        `;
+                    }
+
+                }else{
+
+                    html += `<span class="dots">...</span>`;
+
+                    for(let i=page-1;i<=page+1;i++){
+
+                        html += `
+                        <a href="?page=${i}"
+                        class="page-btn ${page===i?'active':''}">
+                        ${i}
+                        </a>
+                        `;
+                    }
+
+                    html += `<span class="dots">...</span>`;
+
+                    html += `
+                    <a href="?page=${totalPages}"
+                    class="page-btn">
+                    ${totalPages}
+                    </a>
+                    `;
+                }
+            }
         }
 
-    }else{
+        html += `
+        </div>
 
-        if(page <= 4){
+        <div class="goto-box">
 
-            for(let i=2;i<=5;i++){
+            <input
+              id="gotoInput"
+              type="number"
+              min="1"
+              max="${totalPages}"
+              value="${page}"
+            >
 
-                html += `
-                <a href="?page=${i}"
-                class="page-btn ${page===i?'active':''}">
-                ${i}
-                </a>
-                `;
-            }
+            <span>/ ${totalPages}</span>
 
-            html += `
-            <span class="dots">...</span>
-            `;
+            <button onclick="gotoPage()">
+              🚀 Đi đến
+            </button>
 
-            html += `
-            <a href="?page=${totalPages}"
-            class="page-btn">
-            ${totalPages}
-            </a>
-            `;
+        </div>
+        `;
 
-        }else if(page >= totalPages - 3){
-
-            html += `
-            <span class="dots">...</span>
-            `;
-
-            for(let i=totalPages-4;i<=totalPages;i++){
-
-                html += `
-                <a href="?page=${i}"
-                class="page-btn ${page===i?'active':''}">
-                ${i}
-                </a>
-                `;
-            }
-
-        }else{
-
-            html += `
-            <span class="dots">...</span>
-            `;
-
-            for(let i=page-1;i<=page+1;i++){
-
-                html += `
-                <a href="?page=${i}"
-                class="page-btn ${page===i?'active':''}">
-                ${i}
-                </a>
-                `;
-            }
-
-            html += `
-            <span class="dots">...</span>
-            `;
-
-            html += `
-            <a href="?page=${totalPages}"
-            class="page-btn">
-            ${totalPages}
-            </a>
-            `;
-        }
-    }
-}
-
-html += `
-</div>
-
-<div class="goto-box">
-
-    <input
-      id="gotoInput"
-      type="number"
-      min="1"
-      max="${totalPages}"
-      value="${page}"
-    >
-
-    <span>/ ${totalPages}</span>
-
-    <button onclick="gotoPage()">
-      🚀 Đi đến
-    </button>
-
-</div>
-`;
         document.getElementById("videoList").innerHTML = html;
 
     })
@@ -189,6 +174,8 @@ html += `
 
         document.getElementById("videoList").innerHTML =
         '<div class="loading">❌ Không tải được danh sách video</div>';
+
+        console.error(error);
 
     });
 
