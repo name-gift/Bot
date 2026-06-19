@@ -42,13 +42,12 @@ body{
     display:flex;
     align-items:center;
     gap:20px;
-    padding:14px 0;
+    padding:12px 0;
     border-bottom:1px solid rgba(255,255,255,.08);
 }
 
 .video{
     flex:1;
-    color:#fff;
     font-weight:600;
 }
 
@@ -56,11 +55,9 @@ body{
     flex:1;
     color:#00c3ff;
     font-weight:700;
-    word-break:break-all;
 }
 
 .date{
-    min-width:120px;
+    width:120px;
     text-align:right;
-    color:#cbd5e1;
 }
