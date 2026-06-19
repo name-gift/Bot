@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+<title>Thống Kê</title>
+
+<link rel="stylesheet"
+href="stats.css">
+
+</head>
+<body>
+
+<h1>📊 Thống Kê BOT</h1>
+
+<div class="dashboard">
+
+    <div class="card">
+        <h3>Tổng Key</h3>
+        <span id="totalKeys">0</span>
+    </div>
+
+    <div class="card">
+        <h3>Đang Hoạt Động</h3>
+        <span id="activeKeys">0</span>
+    </div>
+
+    <div class="card">
+        <h3>Đã Hết Hạn</h3>
+        <span id="expiredKeys">0</span>
+    </div>
+
+</div>
+
+<div class="panel">
+
+    <h2>🔑 Key Mới Tạo</h2>
+
+    <div id="keyList"></div>
+
+</div>
+
+<script>
+    const API =
+"https://bot-api2.abcd1601ab.workers.dev/";
+
+async function loadStats(){
+
+  const res = await fetch(API,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"getStats"
+    })
+  });
+
+  const data =
+    await res.json();
+
+  if(data.status !== "success")
+    return;
+
+  totalKeys.textContent =
+    data.total;
+
+  activeKeys.textContent =
+    data.active;
+
+  expiredKeys.textContent =
+    data.expired;
+
+  keyList.innerHTML = "";
+
+  data.latest.forEach(item=>{
+
+    keyList.innerHTML += `
+      <div class="keyItem">
+
+        <div>
+          <b>${item.key}</b>
+          <br>
+          <small>${item.video}</small>
+        </div>
+
+        <div>
+          ${new Date(
+            item.expire
+          ).toLocaleDateString("vi-VN")}
+        </div>
+
+      </div>
+    `;
+  });
+
+}
+
+loadStats();
+
+setInterval(loadStats,10000);
+</script>
+
+</body>
+</html>
