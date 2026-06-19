@@ -74,23 +74,15 @@ async function loadStats(){
   data.latest.forEach(item=>{
 
     keyList.innerHTML += `
-      <div class="keyItem">
+  <div class="keyItem">
+    <span class="video">${item.video}</span>
+    <span class="key">${item.key}</span>
+    <span class="date">
+      ${new Date(item.expire).toLocaleDateString("vi-VN")}
+    </span>
+  </div>
+`;
 
-        <div>
-          <b>${item.key}</b>
-          <br>
-          <small>${item.video}</small>
-        </div>
-
-        <div>
-          ${new Date(
-            item.expire
-          ).toLocaleDateString("vi-VN")}
-        </div>
-
-      </div>
-    `;
-  });
 
 }
 
