@@ -42,63 +42,49 @@ href="stats.css">
 </div>
 
 <script>
-    const API =
-"https://bot-api2.abcd1601ab.workers.dev/";
+const API = "https://bot-api2.abcd1601ab.workers.dev/";
 
-async function loadStats(){
+async function loadStats() {
 
   const res = await fetch(API,{
     method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
     body:JSON.stringify({
       action:"getStats"
     })
   });
 
-  const data =
-    await res.json();
+  const data = await res.json();
 
-  if(data.status !== "success")
-    return;
+  if(data.status !== "success") return;
 
-  totalKeys.textContent =
-    data.total;
+  document.getElementById("totalKeys").textContent = data.total;
+  document.getElementById("activeKeys").textContent = data.active;
+  document.getElementById("expiredKeys").textContent = data.expired;
 
-  activeKeys.textContent =
-    data.active;
-
-  expiredKeys.textContent =
-    data.expired;
-
+  const keyList = document.getElementById("keyList");
   keyList.innerHTML = "";
 
-  data.latest.forEach(item=>{
+  data.latest.forEach(item => {
 
-   keyList.innerHTML = "";
+    keyList.innerHTML += `
+      <div class="keyItem">
+        <span class="video">${item.video}</span>
+        <span class="key">${item.key}</span>
+        <span class="date">
+          ${new Date(item.expire).toLocaleDateString("vi-VN")}
+        </span>
+      </div>
+    `;
 
-data.latest.forEach(item => {
-
-keyList.innerHTML = "";
-
-data.latest.forEach(item => {
-
-  keyList.innerHTML += `
-    <div class="keyItem">
-      <span class="video">${item.video}</span>
-      <span class="key">${item.key}</span>
-      <span class="date">
-        ${new Date(item.expire).toLocaleDateString("vi-VN")}
-      </span>
-    </div>
-  `;
-
-});
+  });
 
 }
 
 loadStats();
 setInterval(loadStats, 10000);
-
-
 </script>
 
 </body>
