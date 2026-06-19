@@ -32,10 +32,13 @@ const page = Number(urlParams.get("page")) || 1;
 function loadVideos(){
 
     fetch(
-      "https://bot-api3.abcd1601ab.workers.dev/?type=video&secret=BOT_VIDEO"
-    )
+`https://bot-api3.abcd1601ab.workers.dev/?type=video&page=${page}&limit=6&secret=BOT_VIDEO`
+)
+
     .then(res => res.json())
-    .then(videos => {
+    .then(data => {
+
+    const videos = data.videos;
 
         const perPage = 6;
 
@@ -62,7 +65,7 @@ function loadVideos(){
         });
 
         const totalPages =
-Math.ceil(videos.length / perPage);
+Math.ceil(data.total / 6);
 
 html += `<div class="pagination">`;
 
