@@ -130,12 +130,56 @@ const pageId =
 new URLSearchParams(location.search)
 .get("id");
 
-if(localStorage.getItem("received_key_" + pageId)){
+const getBtn =
+document.getElementById("getBtn");
 
-    document.getElementById("getBtn").disabled = true;
+const savedTime =
+localStorage.getItem(
+    "received_key_" + pageId
+);
 
-    document.getElementById("getBtn").innerHTML =
-    "✅ Đã nhận Key";
+if(savedTime){
+
+    const endTime =
+    Number(savedTime) + 600000; // 10 phút
+
+    function updateCooldown(){
+
+        const remain =
+        endTime - Date.now();
+
+        if(remain <= 0){
+
+            localStorage.removeItem(
+                "received_key_" + pageId
+            );
+
+            getBtn.disabled = false;
+            getBtn.innerHTML = "🔑 Nhận Key";
+
+            clearInterval(timerCooldown);
+
+            return;
+        }
+
+        const mins =
+        Math.floor(remain / 60000);
+
+        const secs =
+        Math.floor((remain % 60000) / 1000);
+
+        getBtn.disabled = true;
+
+        getBtn.innerHTML =
+        `⏳ ${mins}:${secs
+            .toString()
+            .padStart(2,"0")}`;
+    }
+
+    updateCooldown();
+
+    const timerCooldown =
+    setInterval(updateCooldown,1000);
 
 }
   
@@ -279,7 +323,12 @@ function loadKeyFromAPI(){
         "Lỗi tải Key";
 
         document.getElementById("keyArea").style.display =
-        "block";
+"block";
+
+localStorage.setItem(
+    "received_key_" + id,
+    Date.now()
+);
 
     });
 
