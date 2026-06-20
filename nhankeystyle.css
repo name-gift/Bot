@@ -273,3 +273,56 @@ button:hover{
         font-size:24px;
     }
 }
+
+#keyArea{
+    display:none;
+}
+
+.key{
+    animation:keyGlow 1.5s infinite alternate;
+    word-break:break-all;
+}
+
+@keyframes keyGlow{
+
+    from{
+        box-shadow:
+        0 0 20px rgba(34,197,94,.4),
+        0 0 40px rgba(34,197,94,.2);
+    }
+
+    to{
+        box-shadow:
+        0 0 35px rgba(34,197,94,.9),
+        0 0 70px rgba(34,197,94,.4);
+    }
+
+}
+
+#getBtn:disabled{
+    opacity:.7;
+    cursor:not-allowed;
+}
+
+@media(max-width:768px){
+
+    .card{
+        padding:20px;
+    }
+
+    .key{
+        font-size:22px;
+        letter-spacing:2px;
+    }
+
+    #question{
+        font-size:18px;
+    }
+
+    .circle{
+        width:75px;
+        height:75px;
+        font-size:22px;
+    }
+
+}
