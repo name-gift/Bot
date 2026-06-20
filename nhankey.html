@@ -135,12 +135,13 @@ document.getElementById("getBtn");
 
 // Kiểm tra cooldown 10 phút
 const savedTime =
-localStorage.getItem(
-    "received_key_" + pageId
+Number(
+    localStorage.getItem(
+        "received_key_" + pageId
+    )
 );
 
-if(savedTime){
-
+if(!isNaN(savedTime) && savedTime > 0){
     const endTime =
     Number(savedTime) + 600000;
 
@@ -311,9 +312,9 @@ function loadKeyFromAPI(){
         });
 
         localStorage.setItem(
-            "received_key_" + id,
-            "true"
-        );
+    "received_key_" + id,
+    Date.now()
+);
 
     })
     .catch(error => {
