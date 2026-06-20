@@ -326,3 +326,9 @@ button:hover{
     }
 
 }
+
+#getBtn:disabled{
+    background:#475569;
+    opacity:.9;
+    cursor:not-allowed;
+}
