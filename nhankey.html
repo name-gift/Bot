@@ -126,14 +126,35 @@ async function loadQuestions(){
 
 loadQuestions();
 
-document.getElementById("getBtn").onclick = () => {
+const pageId =
+new URLSearchParams(location.search)
+.get("id");
+
+if(localStorage.getItem("received_key_" + pageId)){
+
+    document.getElementById("getBtn").disabled = true;
+
+    document.getElementById("getBtn").innerHTML =
+    "✅ Đã nhận Key";
+
+}
+  
+const getBtn = document.getElementById("getBtn");
+
+getBtn.onclick = () => {
+
+    getBtn.disabled = true;
+    getBtn.innerHTML = "⏳ Đang tải...";
 
     if(questions.length === 0){
 
-    showToast("❌ Chưa tải được danh sách từ khóa");
+        showToast("❌ Chưa tải được danh sách từ khóa");
 
-    return;
-}
+        getBtn.disabled = false;
+        getBtn.innerHTML = "Nhận Key";
+
+        return;
+    }
 
     const randomIndex =
     Math.floor(Math.random() * questions.length);
@@ -145,11 +166,12 @@ document.getElementById("getBtn").onclick = () => {
     currentQuestion;
 
     document.getElementById("title").style.display = "none";
-    document.getElementById("getBtn").style.display = "none";
+
+    getBtn.style.display = "none";
 
     document.getElementById("searchBox").style.display = "block";
 };
-
+  
 document.getElementById("keyword").addEventListener("keypress", function(e){
 
     if(e.key === "Enter"){
@@ -210,15 +232,11 @@ function loadKeyFromAPI(){
     new URLSearchParams(location.search)
     .get("id");
 
-    console.log("ID =", id);
-
     fetch(
       `https://bot-api3.abcd1601ab.workers.dev/?type=key&id=${id}`
     )
     .then(res => res.json())
     .then(data => {
-
-        console.log("API KEY =", data);
 
         document.getElementById("generatedKey").textContent =
         data.key || "Không có Key";
@@ -226,8 +244,31 @@ function loadKeyFromAPI(){
         document.getElementById("copyBtn").style.display =
         "block";
 
-        document.getElementById("keyArea").style.display =
-        "block";
+        const keyArea =
+        document.getElementById("keyArea");
+
+        keyArea.style.display = "block";
+
+        keyArea.animate(
+        [
+            {
+                opacity:0,
+                transform:"scale(0.6)"
+            },
+            {
+                opacity:1,
+                transform:"scale(1)"
+            }
+        ],
+        {
+            duration:800,
+            easing:"ease-out"
+        });
+
+        localStorage.setItem(
+            "received_key_" + id,
+            "true"
+        );
 
     })
     .catch(error => {
@@ -243,6 +284,7 @@ function loadKeyFromAPI(){
     });
 
 }
+  
 document.getElementById("copyBtn").onclick = async () => {
 
     const key =
