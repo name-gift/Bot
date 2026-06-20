@@ -133,6 +133,7 @@ new URLSearchParams(location.search)
 const getBtn =
 document.getElementById("getBtn");
 
+// Kiểm tra cooldown 10 phút
 const savedTime =
 localStorage.getItem(
     "received_key_" + pageId
@@ -141,7 +142,7 @@ localStorage.getItem(
 if(savedTime){
 
     const endTime =
-    Number(savedTime) + 600000; // 10 phút
+    Number(savedTime) + 600000;
 
     function updateCooldown(){
 
@@ -157,7 +158,7 @@ if(savedTime){
             getBtn.disabled = false;
             getBtn.innerHTML = "🔑 Nhận Key";
 
-            clearInterval(timerCooldown);
+            clearInterval(cooldownTimer);
 
             return;
         }
@@ -178,42 +179,42 @@ if(savedTime){
 
     updateCooldown();
 
-    const timerCooldown =
+    const cooldownTimer =
     setInterval(updateCooldown,1000);
-
 }
-  
-const getBtn = document.getElementById("getBtn");
 
 getBtn.onclick = () => {
 
-    getBtn.disabled = true;
-    getBtn.innerHTML = "⏳ Đang tải...";
+    if(getBtn.disabled) return;
 
     if(questions.length === 0){
 
-        showToast("❌ Chưa tải được danh sách từ khóa");
-
-        getBtn.disabled = false;
-        getBtn.innerHTML = "Nhận Key";
+        showToast(
+            "❌ Chưa tải được danh sách từ khóa"
+        );
 
         return;
     }
 
     const randomIndex =
-    Math.floor(Math.random() * questions.length);
+    Math.floor(
+        Math.random() * questions.length
+    );
 
     currentQuestion =
     questions[randomIndex].toUpperCase();
 
-    document.getElementById("question").textContent =
+    document.getElementById("question")
+    .textContent =
     currentQuestion;
 
-    document.getElementById("title").style.display = "none";
+    document.getElementById("title")
+    .style.display = "none";
 
     getBtn.style.display = "none";
 
-    document.getElementById("searchBox").style.display = "block";
+    document.getElementById("searchBox")
+    .style.display = "block";
 };
   
 document.getElementById("keyword").addEventListener("keypress", function(e){
