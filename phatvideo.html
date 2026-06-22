@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -12,10 +13,18 @@
     box-sizing:border-box;
 }
 
+:root{
+    --bg:#0f0f0f;
+    --card:#181818;
+    --text:#ffffff;
+    --sub:#aaaaaa;
+}
+
 body{
-    background:#0f0f0f;
-    color:#fff;
+    background:var(--bg);
+    color:var(--text);
     font-family:Arial,sans-serif;
+    min-height:100vh;
 }
 
 /* Khung video */
@@ -29,6 +38,7 @@ body{
     aspect-ratio:16/9;
     border:none;
     display:block;
+    background:#000;
 }
 
 /* Thông tin video */
@@ -39,20 +49,59 @@ body{
 .video-title{
     font-size:18px;
     font-weight:700;
-    line-height:1.4;
+    line-height:1.5;
 }
 
 .video-meta{
-    color:#aaa;
-    margin-top:6px;
-    font-size:14px;
+    color:var(--sub);
+    font-size:13px;
+    margin-top:8px;
+}
+
+/* Card */
+.card{
+    margin:12px;
+    background:var(--card);
+    border-radius:12px;
+    padding:14px;
+}
+
+.card h3{
+    font-size:15px;
+    margin-bottom:8px;
+}
+
+.card p{
+    color:var(--sub);
+    font-size:13px;
+    line-height:1.5;
+}
+
+/* Mobile */
+@media (max-width:768px){
+
+    .video-title{
+        font-size:16px;
+    }
+
+    .video-meta{
+        font-size:12px;
+    }
+
+    .card{
+        margin:10px;
+    }
 }
 
 /* Landscape giống YouTube */
-@media (orientation: landscape){
+@media (orientation:landscape){
 
+    html,
     body{
+        width:100%;
+        height:100%;
         overflow:hidden;
+        background:#000;
     }
 
     .video-container{
@@ -69,11 +118,13 @@ body{
         aspect-ratio:auto;
     }
 
-    .video-info{
+    .video-info,
+    .card{
         display:none;
     }
 }
 </style>
+
 </head>
 <body>
 
@@ -81,6 +132,7 @@ body{
     <iframe
         id="player"
         class="video-player"
+        allow="autoplay; fullscreen"
         allowfullscreen>
     </iframe>
 </div>
@@ -90,18 +142,29 @@ body{
         📺 Video VIP
     </div>
 
-    <div class="video-meta">
-        Name Gift • Xem trực tuyến
-    </div>
+```
+<div class="video-meta">
+    Name Gift • Đang phát trực tuyến
+</div>
+```
+
+</div>
+
+<div class="card">
+    <h3>Thông tin</h3>
+    <p>
+        Xoay ngang điện thoại để xem toàn màn hình.
+    </p>
 </div>
 
 <script>
 const slug =
-  new URLSearchParams(location.search).get("slug") || "tap0";
+    new URLSearchParams(location.search)
+    .get("slug") || "tap0";
 
 document.getElementById("player").src =
-  "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
-  encodeURIComponent(slug);
+    "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
+    encodeURIComponent(slug);
 </script>
 
 </body>
