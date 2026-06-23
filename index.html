@@ -326,35 +326,13 @@ await res.json();
 
 if(data.status=="found"){
 
-addMsg(`
-
-✅ KEY HỢP LỆ<br><br>
-
-🔑 <b>${key}</b><br><br>
-
-⏰ ${
-data.expire=="never"
-? "Vĩnh viễn"
-: new Date(data.expire)
-.toLocaleString("vi-VN")
-}<br><br>
-
 const token =
 Date.now().toString(36) +
 Math.random().toString(36).slice(2);
 
-sessionStorage.setItem(
-"video_token",
-token
-);
-
 const videoUrl =
 data.link +
-(
-data.link.includes("?")
-? "&"
-: "?"
-) +
+(data.link.includes("?") ? "&" : "?") +
 "token=" +
 encodeURIComponent(token);
 
