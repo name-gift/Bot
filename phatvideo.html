@@ -185,20 +185,10 @@ const slug =
   new URLSearchParams(location.search)
   .get("slug");
 
-fetch(
+location.href =
   "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
-  encodeURIComponent(slug)
-)
-.then(r => r.json())
-.then(data => {
-
-  if(!data.success){
-    throw new Error();
-  }
-
-  location.href = data.link;
-
-});
+  encodeURIComponent(slug);
+    
 </script>
 
 </body>
