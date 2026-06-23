@@ -157,38 +157,36 @@ body{
 
 <script>
 const token =
-new URLSearchParams(location.search)
-.get("token");
+  new URLSearchParams(location.search)
+  .get("token");
 
 if(!token){
 
-document.body.innerHTML = `
-<div style="
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#000;
-color:#fff;
-font-size:24px;
-font-weight:bold;
-">
-🚫 TRUY CẬP BỊ TỪ CHỐI
-</div>
-`;
+  document.body.innerHTML = `
+  <div style="
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#000;
+  color:#fff;
+  font-size:24px;
+  font-weight:bold;
+  ">
+  🚫 TRUY CẬP BỊ TỪ CHỐI
+  </div>
+  `;
 
-throw new Error("Blocked");
-
+  throw new Error("Blocked");
 }
 
 const slug =
   new URLSearchParams(location.search)
-  .get("slug");
+  .get("slug") || "tap0";
 
-location.href =
+document.getElementById("player").src =
   "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
   encodeURIComponent(slug);
-    
 </script>
 
 </body>
