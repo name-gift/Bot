@@ -182,12 +182,23 @@ throw new Error("Blocked");
 }
 
 const slug =
-    new URLSearchParams(location.search)
-    .get("slug") || "tap0";
+  new URLSearchParams(location.search)
+  .get("slug");
 
-document.getElementById("player").src =
-    "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
-    encodeURIComponent(slug);
+fetch(
+  "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
+  encodeURIComponent(slug)
+)
+.then(r => r.json())
+.then(data => {
+
+  if(!data.success){
+    throw new Error();
+  }
+
+  location.href = data.link;
+
+});
 </script>
 
 </body>
