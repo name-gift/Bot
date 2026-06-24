@@ -186,8 +186,10 @@ const slug =
 
 document.getElementById("player").src =
   "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
-  encodeURIComponent(slug);
-</script>
+  encodeURIComponent(slug) +
+  "&token=" +
+  encodeURIComponent(token);
 
+</script>
 </body>
 </html>
