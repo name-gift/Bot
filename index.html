@@ -329,7 +329,15 @@ if(data.status=="found"){
 const token =
 Date.now().toString(36) +
 Math.random().toString(36).slice(2);
-
+await fetch(API,{
+  method:"POST",
+  body:JSON.stringify({
+    action:"saveToken",
+    token:token,
+    expire:data.expire
+  })
+});
+    
 const videoUrl =
 data.link +
 (data.link.includes("?") ? "&" : "?") +
