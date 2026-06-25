@@ -160,6 +160,18 @@ const token =
   new URLSearchParams(location.search)
   .get("token");
 
+// Tạo DeviceID
+let deviceId =
+  localStorage.getItem("deviceId");
+
+if(!deviceId){
+  deviceId = crypto.randomUUID();
+  localStorage.setItem(
+    "deviceId",
+    deviceId
+  );
+}
+
 if(!token){
 
   document.body.innerHTML = `
