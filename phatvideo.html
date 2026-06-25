@@ -212,8 +212,10 @@ const slug =
     );
 
   const data =
-    await res.json();
+  await res.json();
 
+console.log("CHECK TOKEN:", data);
+alert(JSON.stringify(data));
   if(data.status !== "success"){
 
     document.body.innerHTML = `
