@@ -196,11 +196,54 @@ const slug =
   new URLSearchParams(location.search)
   .get("slug") || "tap0";
 
-document.getElementById("player").src =
-  "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
-  encodeURIComponent(slug) +
-  "&token=" +
-  encodeURIComponent(token);
+(async()=>{
+
+  const res =
+    await fetch(
+      "https://bot-api.abcd1601ab.workers.dev/",
+      {
+        method:"POST",
+        body:JSON.stringify({
+          action:"checkVideoToken",
+          token:token,
+          deviceId:deviceId
+        })
+      }
+    );
+
+  const data =
+    await res.json();
+
+  if(data.status !== "success"){
+
+    document.body.innerHTML = `
+    <div style="
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#000;
+    color:#ff4d4d;
+    font-size:22px;
+    font-weight:bold;
+    text-align:center;
+    padding:20px;
+    ">
+    🚫 TOKEN KHÔNG HỢP LỆ<br><br>
+    ${data.status}
+    </div>
+    `;
+
+    return;
+  }
+
+  document.getElementById("player").src =
+    "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
+    encodeURIComponent(slug) +
+    "&token=" +
+    encodeURIComponent(token);
+
+})();
 
 </script>
 </body>
