@@ -164,6 +164,20 @@ Gửi
 const API =
 "https://bot-api.abcd1601ab.workers.dev/";
 
+let deviceId =
+localStorage.getItem("deviceId");
+
+if(!deviceId){
+
+  deviceId =
+  crypto.randomUUID();
+
+  localStorage.setItem(
+    "deviceId",
+    deviceId
+  );
+}
+    
 let maintenance = false;
 
 async function loadMaintenance(){
@@ -334,7 +348,8 @@ await fetch(API,{
   body:JSON.stringify({
     action:"saveVideoToken",
     token:token,
-    expire:data.expire
+    expire:data.expire,
+    deviceId:deviceId
   })
 });
     
