@@ -237,6 +237,56 @@ const slug =
     return;
   }
 
+    // Kiểm tra đúng tập
+if (data.slug !== slug) {
+
+  document.body.innerHTML = `
+  <div style="
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#0f0f0f;
+    color:white;
+    font-family:Arial,sans-serif;
+  ">
+    <div style="
+      width:90%;
+      max-width:420px;
+      background:#1b1b1b;
+      border-radius:18px;
+      padding:35px;
+      text-align:center;
+      box-shadow:0 15px 40px rgba(0,0,0,.45);
+    ">
+
+      <div style="font-size:65px;">🚫</div>
+
+      <h2 style="
+        margin-top:18px;
+        color:#ff4d4f;
+      ">
+        Sai tập phim
+      </h2>
+
+      <p style="
+        margin-top:12px;
+        color:#bbb;
+        line-height:1.7;
+      ">
+        Key này chỉ dùng để xem
+        <b>${data.slug}</b><br>
+        Bạn đang mở
+        <b>${slug}</b>.
+      </p>
+
+    </div>
+  </div>
+  `;
+
+  return;
+}
+
   document.getElementById("player").src =
     "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
     encodeURIComponent(slug) +
