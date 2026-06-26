@@ -289,11 +289,10 @@ if (data.slug !== slug) {
 }
 
   document.getElementById("player").src =
-    "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
-    encodeURIComponent(slug) +
-    "&token=" +
-    encodeURIComponent(token);
-
+"https://bot-api-phatvideo.abcd1601ab.workers.dev/?" +
+"slug=" + encodeURIComponent(slug) +
+"&token=" + encodeURIComponent(token) +
+"&deviceId=" + encodeURIComponent(deviceId);
 })();
 
 </script>
