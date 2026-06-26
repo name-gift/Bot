@@ -204,10 +204,11 @@ const slug =
       {
         method:"POST",
         body:JSON.stringify({
-          action:"checkVideoToken",
-          token:token,
-          deviceId:deviceId
-        })
+    action:"checkVideoToken",
+    token:token,
+    deviceId:deviceId,
+    slug:slug
+})
       }
     );
 
