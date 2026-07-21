@@ -1,44 +1,83 @@
-async function checkKey() {
+const API = "https://bot-api.abcd1601ab.workers.dev/";
 
-  const userKey =
-    document.getElementById("key").value.trim();
+(async () => {
 
-  try {
+  const params = new URLSearchParams(location.search);
 
-    const res = await fetch(
-      "https://bot-api.abcd1601ab.workers.dev/"
-    );
+  const slug = params.get("slug");
+  const token = params.get("token");
 
-    const data = await res.json();
+  if (!slug || !token) {
 
-    if (!data.success) {
-      document.getElementById("msg").textContent =
-        "Không lấy được key từ API";
-      return;
-    }
+    document.body.innerHTML =
+      "<h2>❌ Thiếu slug hoặc token</h2>";
 
-    if (userKey !== data.key) {
-      document.getElementById("msg").textContent =
-        "❌ Key không đúng";
-      return;
-    }
+    return;
 
-    document.getElementById("login").style.display = "none";
-
-    const player =
-      document.getElementById("player");
-
-    player.style.display = "block";
-
-    const slug =
-      new URLSearchParams(location.search).get("slug") || "tap0";
-
-    player.src =
-      "https://bot-api-phatvideo.abcd1601ab.workers.dev/?slug=" +
-      encodeURIComponent(slug);
-
-  } catch (e) {
-    document.getElementById("msg").textContent =
-      "Lỗi kết nối API";
   }
-}
+
+  // Device ID
+  let deviceId = localStorage.getItem("deviceId");
+
+  if (!deviceId) {
+
+    deviceId = crypto.randomUUID();
+
+    localStorage.setItem("deviceId", deviceId);
+
+  }
+
+  // Kiểm tra token
+  const res = await fetch(API, {
+
+    method: "POST",
+
+    body: JSON.stringify({
+
+      action: "checkVideoToken",
+
+      token,
+
+      slug,
+
+      deviceId
+
+    })
+
+  });
+
+  const data = await res.json();
+
+  if (data.status !== "success") {
+
+    document.body.innerHTML =
+      "<h2>❌ Token không hợp lệ</h2>";
+
+    return;
+
+  }
+
+  // Lấy link video theo slug
+  const video = await fetch(
+
+    API +
+    "?type=slug&slug=" +
+    encodeURIComponent(slug)
+
+  );
+
+  const videoData = await video.json();
+
+  if (!videoData.success) {
+
+    document.body.innerHTML =
+      "<h2>❌ Không tìm thấy video</h2>";
+
+    return;
+
+  }
+
+  document.getElementById("player").src =
+    videoData.link;
+
+})();
