@@ -1,0 +1,202 @@
+let questions = [];
+
+let currentQuestion = "";
+
+function showToast(text){
+
+    const toast =
+    document.getElementById("toast");
+
+    if(!toast) return;
+
+    toast.innerHTML = text;
+    toast.style.display = "block";
+
+    setTimeout(()=>{
+        toast.style.display = "none";
+    },2000);
+
+}
+
+function generateKey(length = 7){
+
+    const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    let result = "";
+
+    for(let i = 0; i < length; i++){
+        result += chars.charAt(
+            Math.floor(Math.random() * chars.length)
+        );
+    }
+
+    return result;
+}
+
+async function loadQuestions(){
+
+    try{
+
+        const res = await fetch(
+            "https://bot-api3.abcd1601ab.workers.dev/?type=questions"
+        );
+
+        questions = await res.json();
+
+        console.log(questions);
+
+    }catch(err){
+
+        console.error(err);
+
+        questions = [];
+
+    }
+
+}
+
+loadQuestions();
+
+document.getElementById("getBtn").onclick = () => {
+
+    if(questions.length === 0){
+
+    showToast("❌ Chưa tải được danh sách từ khóa");
+
+    return;
+}
+
+    const randomIndex =
+    Math.floor(Math.random() * questions.length);
+
+    currentQuestion =
+    questions[randomIndex].toUpperCase();
+
+    document.getElementById("question").textContent =
+    currentQuestion;
+
+    document.getElementById("title").style.display = "none";
+    document.getElementById("getBtn").style.display = "none";
+
+    document.getElementById("searchBox").style.display = "block";
+};
+
+document.getElementById("keyword").addEventListener("keypress", function(e){
+
+    if(e.key === "Enter"){
+        document.getElementById("searchBtn").click();
+    }
+
+});
+
+document.getElementById("searchBtn").onclick = () => {
+
+    const value =
+    document.getElementById("keyword")
+    .value
+    .trim()
+    .toUpperCase();
+
+    if(value !== currentQuestion){
+
+    showToast("❌ Từ khóa không chính xác!");
+
+    return;
+}
+
+    document.getElementById("keyword").disabled = true;
+    document.getElementById("searchBtn").disabled = true;
+
+    document.getElementById("timerBox").style.display = "block";
+
+    let time = 60;
+
+    const timer =
+    document.getElementById("timer");
+
+    timer.textContent = time;
+
+    const countdown = setInterval(() => {
+
+        time--;
+
+        timer.textContent = time;
+
+        if(time <= 0){
+
+        clearInterval(countdown);
+
+         document.getElementById("timerBox").style.display = "none";
+
+         loadKeyFromAPI();
+
+        }
+
+    },1000);
+};
+
+function loadKeyFromAPI(){
+
+    const id =
+    new URLSearchParams(location.search)
+    .get("id");
+
+    console.log("ID =", id);
+
+    fetch(
+      `https://bot-api3.abcd1601ab.workers.dev/?type=key&id=${id}`
+    )
+    .then(res => res.json())
+    .then(data => {
+
+        console.log("API KEY =", data);
+
+        document.getElementById("generatedKey").textContent =
+        data.key || "Không có Key";
+
+        document.getElementById("copyBtn").style.display =
+        "block";
+
+        document.getElementById("keyArea").style.display =
+        "block";
+
+    })
+    .catch(error => {
+
+        console.error(error);
+
+        document.getElementById("generatedKey").textContent =
+        "Lỗi tải Key";
+
+        document.getElementById("keyArea").style.display =
+        "block";
+
+    });
+
+}
+document.getElementById("copyBtn").onclick = async () => {
+
+    const key =
+    document.getElementById("generatedKey").textContent;
+
+    try{
+
+        await navigator.clipboard.writeText(key);
+
+        document.getElementById("copyBtn").textContent =
+        "✅ Đã sao chép";
+
+        setTimeout(()=>{
+            document.getElementById("copyBtn").textContent =
+            "📋 Sao chép Key";
+        },2000);
+
+    }catch(err){
+
+        showToast("❌ Không thể sao chép!");
+
+    }
+
+};
+

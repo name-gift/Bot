@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Loading...</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- CSS -->
+  <link rel="stylesheet" href="loadingstyle.css">
+</head>
+<body>
+
+<div class="spinner-container">
+    <div class="spinner"></div>
+    <div class="text">Đang tải dữ liệu…</div>
+</div>
+
+<script>
+if (!sessionStorage.getItem("loaded")) {
+    sessionStorage.setItem("loaded", "1");
+    setTimeout(() => {
+        window.location.replace("Bot%20start.html");
+    }, 4500);
+}
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nhận Key</title>
+
+<!-- CSS -->
+  <link rel="stylesheet" href="nhankeystyle.css">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1 id="title">🔑 Nhận Key</h1>
+
+        <button id="getBtn">
+            Nhận Key
+        </button>
+
+        <div id="searchBox">
+
+            <h3>Hãy tìm kiếm cụm từ sau:</h3>
+
+            <p id="question"></p>
+
+            <input
+                type="text"
+                id="keyword"
+                placeholder="Nhập đúng cụm từ ở trên..."
+            >
+
+            <button id="searchBtn">
+                Xác Nhận
+            </button>
+
+        </div>
+
+        <div id="keyArea">
+
+            <h2>🎉 Key của bạn</h2>
+
+            <div class="key" id="generatedKey">
+               KEY
+            </div>
+
+            <button id="copyBtn" style="margin-top:10px;display:none;background:#f59e0b;color:white;">
+              📋 Sao chép Key
+            </button>
+
+            <a href="Link%20video.html" class="back-link">
+                ➜ Về trang link
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="timer-container" id="timerBox">
+    <div class="circle" id="timer">60</div>
+</div>
+
+<script src="js/linknhankey.js"></script>
+
+<div id="toast" class="toast"></div>
+
+</body>
+</html>

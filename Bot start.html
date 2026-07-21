@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOT START KEY</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- ==================== SCRIPT CHUYỂN SANG LOADING ==================== -->
+<script>
+/* CHỈ NHẢY SANG LOADING 1 LẦN */
+if (!sessionStorage.getItem("fromLoading")) {
+    sessionStorage.setItem("fromLoading", "1");
+    setTimeout(() => {
+        window.location.replace("loading.html");
+    }, 300); // 300ms delay trước khi hiển thị loading
+}
+</script>
+
+<!-- CSS -->
+  <link rel="stylesheet" href="botstartstyle.css">
+</head>
+<body>
+
+<div id="maintOverlay" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.75);
+backdrop-filter:blur(6px);
+z-index:9999;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+text-align:center;
+padding:20px;
+">
+
+<div style="
+background:#101827;
+padding:30px;
+border-radius:25px;
+border:1px solid rgba(255,255,255,0.05);
+max-width:350px;
+width:100%;
+">
+
+<div style="
+font-size:55px;
+margin-bottom:15px;
+">
+🛠
+</div>
+
+<h2 style="
+margin-bottom:10px;
+">
+BOT ĐANG BẢO TRÌ
+</h2>
+
+<div style="
+color:#9ca3af;
+line-height:1.6;
+margin-top:8px;
+">
+Vui lòng quay lại sau
+</div>
+
+<div id="maintTime" style="
+margin-top:12px;
+font-size:18px;
+font-weight:700;
+color:#00bfff;
+">
+⏳ Đang tải...
+</div>
+
+<div
+onclick="location.reload()"
+style="
+margin-top:18px;
+display:inline-block;
+padding:12px 22px;
+border-radius:14px;
+background:linear-gradient(45deg,#00bfff,#0066ff);
+font-weight:700;
+cursor:pointer;
+transition:.2s;
+">
+
+🔄 TẢI LẠI TRANG
+
+</div>
+
+<div
+onclick="window.open('Link video.html','_blank')"
+style="
+margin-top:12px;
+display:inline-block;
+padding:12px 22px;
+border-radius:14px;
+background:linear-gradient(45deg,#22c55e,#16a34a);
+font-weight:700;
+cursor:pointer;
+">
+
+🎬 TRANG PHIM
+
+</div>
+
+</div>
+
+</div>
+
+<div class="chat">
+
+<div class="top">
+
+<div class="avatar">
+<img src="https://i.imgur.com/Z7AzH2c.jpg">
+</div>
+
+<div>
+<b>BOT START KEY</b><br>
+<small id="statusText">🟢 Online</small>
+</div>
+
+</div>
+
+<!-- COMMAND BUTTON -->
+
+<div class="cmds">
+
+<div class="cmdBtn"
+onclick="autoStart()">
+/start
+</div>
+
+<div class="cmdBtn"
+onclick="location.href='Link video.html'">
+🎬 Trang Phim
+</div>
+
+</div>
+
+<div class="messages" id="messages"></div>
+
+<div class="inputBox">
+
+<input id="msg" placeholder="Nhập key...">
+
+<button onclick="send()">
+Gửi
+</button>
+
+</div>
+
+</div>
+
+<script src="js/botstart.js"></script>
+
+</html>
