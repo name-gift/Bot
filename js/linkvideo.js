@@ -1,8 +1,8 @@
 function loadVideos(){
 
     fetch(
-      "https://script.google.com/macros/s/AKfycbwrcIhNszdf7N_FXLW4F78fTxCb_Mzg1mpYW7JmoqugiRuigMEksbtw7nTVtL4mAHbK/exec"
-    )
+    "https://script.google.com/macros/s/AKfycbwrcIhNszdf7N_FXLW4F78fTxCb_Mzg1mpYW7JmoqugiRuigMEksbtw7nTVtL4mAHbK/exec?type=video&page=1&limit=6"
+)
     .then(res => res.json())
     .then(videos => {
 
