@@ -76,7 +76,6 @@ function show(
 
         h2 {
             margin: 0 0 15px;
-
             color: ${color};
         }
 
@@ -90,7 +89,6 @@ function show(
 
         </style>
 
-
         <div class="box">
 
             <h2>${title}</h2>
@@ -98,7 +96,6 @@ function show(
             <p>${message}</p>
 
         </div>
-
     `;
 }
 
@@ -107,7 +104,10 @@ function show(
 // LOADING
 // ======================================================
 
-function showLoading() {
+function showLoading(
+    title = "Đang kiểm tra...",
+    message = "Vui lòng chờ vài giây."
+) {
 
     document.body.innerHTML = `
 
@@ -158,17 +158,15 @@ function showLoading() {
 
         </style>
 
-
         <div class="loader">
 
             <div class="spin"></div>
 
-            <h2>Đang xác minh KEY...</h2>
+            <h2>${title}</h2>
 
-            <p>Vui lòng chờ vài giây.</p>
+            <p>${message}</p>
 
         </div>
-
     `;
 }
 
@@ -212,7 +210,6 @@ function getDeviceId() {
             "deviceId",
             deviceId
         );
-
     }
 
 
@@ -221,12 +218,179 @@ function getDeviceId() {
 
 
 // ======================================================
-// XÁC MINH KEY VỚI WORKER PHÁT VIDEO
+// LẤY SESSION ĐÃ LƯU
+// ======================================================
+
+function getSavedSession() {
+
+    const session =
+        sessionStorage.getItem(
+            "video_session"
+        );
+
+    const expire =
+        Number(
+            sessionStorage.getItem(
+                "video_session_expire"
+            )
+        );
+
+
+    if (!session || !expire) {
+
+        return null;
+    }
+
+
+    // Kiểm tra nhanh ở trình duyệt
+    if (Date.now() >= expire) {
+
+        clearSession();
+
+        return null;
+    }
+
+
+    return session;
+}
+
+
+// ======================================================
+// XÓA SESSION
+// ======================================================
+
+function clearSession() {
+
+    sessionStorage.removeItem(
+        "video_session"
+    );
+
+    sessionStorage.removeItem(
+        "video_session_expire"
+    );
+}
+
+
+// ======================================================
+// KIỂM TRA SESSION VỚI VERIFY WORKER
+// ======================================================
+
+async function checkExistingSession() {
+
+    const session =
+        getSavedSession();
+
+
+    if (!session) {
+
+        return false;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                VERIFY_WORKER +
+                "/api/session?session=" +
+                encodeURIComponent(session),
+
+                {
+
+                    method: "GET",
+
+                    cache: "no-store"
+
+                }
+
+            );
+
+
+        let result;
+
+
+        try {
+
+            result =
+                await response.json();
+
+        }
+
+        catch {
+
+            clearSession();
+
+            return false;
+
+        }
+
+
+        console.log(
+            "SESSION CHECK:",
+            result
+        );
+
+
+        // ==========================================
+        // SESSION CÒN HẠN
+        // ==========================================
+
+        if (
+            response.ok &&
+            result.success
+        ) {
+
+            // Worker là nguồn thời gian chính
+            if (result.expire) {
+
+                sessionStorage.setItem(
+
+                    "video_session_expire",
+
+                    String(
+                        result.expire
+                    )
+
+                );
+
+            }
+
+
+            return true;
+        }
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "SESSION CHECK ERROR:",
+            error
+        );
+
+    }
+
+
+    // ==========================================
+    // SESSION KHÔNG HỢP LỆ
+    // ==========================================
+
+    clearSession();
+
+    return false;
+}
+
+
+// ======================================================
+// XÁC MINH KEY VỚI VIDEO WORKER
 // ======================================================
 
 async function verifyKey(session) {
 
     if (!checkURL()) {
+
         return;
     }
 
@@ -234,15 +398,18 @@ async function verifyKey(session) {
     if (!session) {
 
         show(
-            "❌ Thiếu phiên xác minh",
-            "Vui lòng xác minh lại."
+            "🔐 Chưa xác minh",
+            "Vui lòng xác minh Turnstile."
         );
 
         return;
     }
 
 
-    showLoading();
+    showLoading(
+        "Đang mở video...",
+        "Đang kiểm tra KEY và thiết bị."
+    );
 
 
     const deviceId =
@@ -252,6 +419,7 @@ async function verifyKey(session) {
     try {
 
         const url =
+
             VIDEO_WORKER +
 
             "?slug=" +
@@ -268,11 +436,20 @@ async function verifyKey(session) {
 
 
         const response =
-            await fetch(url);
+            await fetch(
+
+                url,
+
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+
+            );
 
 
         // ==================================================
-        // SERVER CHO PHÉP PHÁT VIDEO
+        // VIDEO WORKER CHO PHÉP
         // ==================================================
 
         if (response.ok) {
@@ -292,14 +469,14 @@ async function verifyKey(session) {
 
 
         // ==================================================
-        // SERVER TRẢ JSON ERROR
+        // VIDEO WORKER TRẢ JSON ERROR
         // ==================================================
-
-        let result;
-
 
         const text =
             await response.text();
+
+
+        let result;
 
 
         try {
@@ -313,7 +490,8 @@ async function verifyKey(session) {
 
             show(
                 "❌ Lỗi máy chủ",
-                text || "Không thể phát video."
+                text ||
+                "Không thể phát video."
             );
 
             return;
@@ -321,23 +499,41 @@ async function verifyKey(session) {
 
 
         // ==================================================
-        // XỬ LÝ ERROR
+        // SESSION HẾT HẠN
         // ==================================================
 
-        switch (result.status) {
+        if (
+
+            result.status ===
+            "session_invalid"
+
+            ||
+
+            result.status ===
+            "session_expired"
+
+        ) {
+
+            clearSession();
 
 
-            case "session_invalid":
+            show(
+                "🔐 Phiên xác minh hết hạn",
+                "Vui lòng tải lại trang và xác minh lại."
+            );
 
-            case "session_expired":
 
-                show(
-                    "🔐 Phiên xác minh hết hạn",
-                    "Vui lòng xác minh lại."
-                );
+            return;
+        }
 
-                break;
 
+        // ==================================================
+        // DEVICE BLOCK
+        // ==================================================
+
+        switch (
+            result.status
+        ) {
 
             case "device_blocked":
 
@@ -413,7 +609,9 @@ async function verifyKey(session) {
 // TURNSTILE SUCCESS
 // ======================================================
 
-async function onVerified(turnstileToken) {
+async function onVerified(
+    turnstileToken
+) {
 
     const status =
         document.getElementById(
@@ -432,8 +630,8 @@ async function onVerified(turnstileToken) {
         status.textContent =
             "Đang kiểm tra xác minh...";
 
-        status.className = "status";
-
+        status.className =
+            "status";
     }
 
 
@@ -441,14 +639,13 @@ async function onVerified(turnstileToken) {
 
         loading.style.display =
             "block";
-
     }
 
 
     try {
 
         // ==================================================
-        // GỬI TURNSTILE TOKEN ĐẾN VERIFY WORKER
+        // GỬI TOKEN TURNSTILE
         // ==================================================
 
         const response =
@@ -473,7 +670,9 @@ async function onVerified(turnstileToken) {
                         token:
                             turnstileToken
 
-                    })
+                    }),
+
+                    cache: "no-store"
 
                 }
 
@@ -509,7 +708,6 @@ async function onVerified(turnstileToken) {
                 "Xác minh thất bại."
 
             );
-
         }
 
 
@@ -522,7 +720,6 @@ async function onVerified(turnstileToken) {
             throw new Error(
                 "Worker không trả về session."
             );
-
         }
 
 
@@ -531,20 +728,28 @@ async function onVerified(turnstileToken) {
         // ==================================================
 
         sessionStorage.setItem(
+
             "video_session",
+
             result.session
+
         );
 
 
         // ==================================================
-        // LƯU THỜI GIAN HẾT HẠN
+        // LƯU THỜI HẠN
         // ==================================================
 
         if (result.expire) {
 
             sessionStorage.setItem(
+
                 "video_session_expire",
-                String(result.expire)
+
+                String(
+                    result.expire
+                )
+
             );
 
         }
@@ -561,7 +766,6 @@ async function onVerified(turnstileToken) {
 
             status.className =
                 "status success";
-
         }
 
 
@@ -569,7 +773,6 @@ async function onVerified(turnstileToken) {
 
             loading.style.display =
                 "none";
-
         }
 
 
@@ -577,31 +780,35 @@ async function onVerified(turnstileToken) {
         // ĐÓNG OVERLAY
         // ==================================================
 
-        setTimeout(() => {
+        setTimeout(
+            () => {
 
-            const overlay =
-                document.getElementById(
-                    "verifyOverlay"
+                const overlay =
+                    document.getElementById(
+                        "verifyOverlay"
+                    );
+
+
+                if (overlay) {
+
+                    overlay.style.display =
+                        "none";
+                }
+
+
+                // ==========================================
+                // PHÁT VIDEO
+                // ==========================================
+
+                verifyKey(
+                    result.session
                 );
 
+            },
 
-            if (overlay) {
+            400
 
-                overlay.style.display =
-                    "none";
-
-            }
-
-
-            // ==============================================
-            // GỬI SESSION SANG WORKER PHÁT VIDEO
-            // ==============================================
-
-            verifyKey(
-                result.session
-            );
-
-        }, 400);
+        );
 
     }
 
@@ -617,7 +824,6 @@ async function onVerified(turnstileToken) {
 
             loading.style.display =
                 "none";
-
         }
 
 
@@ -629,7 +835,6 @@ async function onVerified(turnstileToken) {
 
             status.className =
                 "status error";
-
         }
 
 
@@ -637,7 +842,9 @@ async function onVerified(turnstileToken) {
         // RESET TURNSTILE
         // ==================================================
 
-        if (window.turnstile) {
+        if (
+            window.turnstile
+        ) {
 
             try {
 
@@ -676,7 +883,6 @@ function onExpired() {
 
         loading.style.display =
             "none";
-
     }
 
 
@@ -687,7 +893,6 @@ function onExpired() {
 
         status.className =
             "status error";
-
     }
 
 }
@@ -715,7 +920,6 @@ function onError() {
 
         loading.style.display =
             "none";
-
     }
 
 
@@ -726,6 +930,81 @@ function onError() {
 
         status.className =
             "status error";
+    }
+
+}
+
+
+// ======================================================
+// KHỞI ĐỘNG
+// ======================================================
+
+async function startVideo() {
+
+    // ==================================================
+    // KIỂM TRA URL
+    // ==================================================
+
+    if (!checkURL()) {
+
+        return;
+    }
+
+
+    // ==================================================
+    // KIỂM TRA SESSION CŨ
+    // ==================================================
+
+    const hasValidSession =
+        await checkExistingSession();
+
+
+    // ==================================================
+    // SESSION CÒN HẠN
+    // ==================================================
+
+    if (hasValidSession) {
+
+        const session =
+            sessionStorage.getItem(
+                "video_session"
+            );
+
+
+        console.log(
+            "SESSION CÒN HẠN → KHÔNG CẦN TURNSTILE"
+        );
+
+
+        verifyKey(
+            session
+        );
+
+
+        return;
+    }
+
+
+    // ==================================================
+    // KHÔNG CÓ SESSION
+    // → HIỆN TURNSTILE
+    // ==================================================
+
+    console.log(
+        "KHÔNG CÓ SESSION → CHỜ TURNSTILE"
+    );
+
+
+    const overlay =
+        document.getElementById(
+            "verifyOverlay"
+        );
+
+
+    if (overlay) {
+
+        overlay.style.display =
+            "flex";
 
     }
 
@@ -733,19 +1012,73 @@ function onError() {
 
 
 // ======================================================
-// KHÔNG GỌI verifyKey() Ở ĐÂY
+// KHỞI ĐỘNG SAU KHI HTML LOAD
+// ======================================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    startVideo
+);
+
+
+// ======================================================
+// LUỒNG
 // ======================================================
 //
-// Turnstile phải gọi:
+// Lần đầu:
 //
-// onVerified(token)
+// phatvideo.html
 //       ↓
-// Verify Worker
+// startVideo()
 //       ↓
-// session
+// không có session
+//       ↓
+// Turnstile
+//       ↓
+// onVerified()
+//       ↓
+// /api/verify
+//       ↓
+// session 10 phút
 //       ↓
 // verifyKey(session)
 //       ↓
-// Video Worker
+// bot-api-phatvideo
+//       ↓
+// VIDEO
+//
+//
+// F5 trong 10 phút:
+//
+// phatvideo.html
+//       ↓
+// startVideo()
+//       ↓
+// sessionStorage có session
+//       ↓
+// /api/session
+//       ↓
+// Session OK
+//       ↓
+// verifyKey(session)
+//       ↓
+// VIDEO
+//
+//
+// F5 sau 10 phút:
+//
+// phatvideo.html
+//       ↓
+// startVideo()
+//       ↓
+// /api/session
+//       ↓
+// Session hết hạn
+//       ↓
+// xóa session
+//       ↓
+// Turnstile
+//       ↓
+// xác minh lại
 //
 // ======================================================
