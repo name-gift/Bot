@@ -1,268 +1,726 @@
+/* ========================================
+   CLOUDFLARE WORKER XÁC MINH TURNSTILE
+======================================== */
 
-const p = new URLSearchParams(location.search);
+const VERIFY_WORKER =
+    "https://xac-thuc-nguoi-dung.abcd1601ab.workers.dev";
 
-const slug = p.get("slug");
-const token = p.get("token");
 
-function show(title, msg, color = "#ff4d4f") {
+/* ========================================
+   LẤY PARAMETER
+======================================== */
 
-document.body.innerHTML = `
-<style>
+const p =
+    new URLSearchParams(
+        location.search
+    );
 
-body{
+const slug =
+    p.get("slug");
 
-margin:0;
-height:100vh;
+const token =
+    p.get("token");
 
-display:flex;
-justify-content:center;
-align-items:center;
 
-background:#0f172a;
+/* ========================================
+   HIỂN THỊ LỖI
+======================================== */
 
-font-family:Poppins,sans-serif;
+function show(
+    title,
+    msg,
+    color = "#ff4d4f"
+) {
 
-color:#fff;
+    document.body.innerHTML = `
 
-}
+    <style>
 
-.box{
+    body{
 
-width:90%;
-max-width:420px;
+        margin:0;
+        height:100vh;
 
-padding:30px;
+        display:flex;
+        justify-content:center;
+        align-items:center;
 
-border-radius:18px;
+        background:#0f172a;
 
-background:#1e293b;
+        font-family:Poppins,sans-serif;
 
-text-align:center;
+        color:#fff;
 
-box-shadow:0 0 25px rgba(0,0,0,.4);
+    }
 
-}
+    .box{
 
-h2{
+        width:90%;
+        max-width:420px;
 
-margin:0 0 15px;
+        padding:30px;
 
-color:${color};
+        border-radius:18px;
 
-}
+        background:#1e293b;
 
-p{
+        text-align:center;
 
-margin:0;
+        box-shadow:
+            0 0 25px rgba(0,0,0,.4);
 
-opacity:.9;
+    }
 
-line-height:1.6;
+    h2{
 
-}
+        margin:0 0 15px;
 
-</style>
+        color:${color};
 
-<div class="box">
+    }
 
-<h2>${title}</h2>
+    p{
 
-<p>${msg}</p>
+        margin:0;
 
-</div>
-`;
+        opacity:.9;
 
-}
+        line-height:1.6;
 
-if(!slug || !token){
+    }
 
-show(
-"❌ Liên kết không hợp lệ",
-"Vui lòng nhận lại KEY từ BOT."
-);
+    </style>
 
-throw "";
+    <div class="box">
 
-}
+        <h2>${title}</h2>
 
-document.body.innerHTML=`
+        <p>${msg}</p>
 
-<style>
+    </div>
 
-body{
-
-margin:0;
-
-height:100vh;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-background:#0f172a;
-
-font-family:Poppins,sans-serif;
-
-color:#fff;
+    `;
 
 }
 
-.loader{
 
-text-align:center;
+/* ========================================
+   LOADING
+======================================== */
 
-}
+function showLoading() {
 
-.spin{
+    document.body.innerHTML = `
 
-width:65px;
+    <style>
 
-height:65px;
+    body{
 
-border:6px solid rgba(255,255,255,.15);
+        margin:0;
 
-border-top:6px solid #00d4ff;
+        height:100vh;
 
-border-radius:50%;
+        display:flex;
 
-animation:spin 1s linear infinite;
+        justify-content:center;
 
-margin:auto auto 20px;
+        align-items:center;
 
-}
+        background:#0f172a;
 
-@keyframes spin{
+        font-family:Poppins,sans-serif;
 
-to{
+        color:#fff;
 
-transform:rotate(360deg);
+    }
 
-}
+    .loader{
 
-}
+        text-align:center;
 
-</style>
+    }
 
-<div class="loader">
+    .spin{
 
-<div class="spin"></div>
+        width:65px;
 
-<h2>Đang xác minh KEY...</h2>
+        height:65px;
 
-<p>Vui lòng chờ vài giây.</p>
+        border:6px solid rgba(255,255,255,.15);
 
-</div>
+        border-top:6px solid #00d4ff;
 
-`;
+        border-radius:50%;
 
-let deviceId = localStorage.getItem("deviceId");
+        animation:
+            spin 1s linear infinite;
 
-if(!deviceId){
+        margin:
+            auto auto 20px;
 
-deviceId = crypto.randomUUID();
+    }
 
-localStorage.setItem("deviceId",deviceId);
+    @keyframes spin{
 
-}
+        to{
 
-fetch(
+            transform:rotate(360deg);
 
-"https://bot-api-phatvideo.abcd1601ab.workers.dev/"
+        }
 
-+ "?slug=" + encodeURIComponent(slug)
+    }
 
-+ "&token=" + encodeURIComponent(token)
+    </style>
 
-+ "&deviceId=" + encodeURIComponent(deviceId)
+    <div class="loader">
 
-)
+        <div class="spin"></div>
 
-.then(async r=>{
+        <h2>Đang xác minh KEY...</h2>
 
-if(r.ok){
+        <p>Vui lòng chờ vài giây.</p>
 
-const html=await r.text();
+    </div>
 
-document.open();
-
-document.write(html);
-
-document.close();
-
-return;
+    `;
 
 }
 
-let txt=await r.text();
 
-try{
+/* ========================================
+   KIỂM TRA URL
+======================================== */
 
-txt=JSON.parse(txt);
+function checkURL() {
 
-}catch{
+    if (!slug || !token) {
 
-show("❌ Lỗi",txt);
+        show(
 
-return;
+            "❌ Liên kết không hợp lệ",
 
-}
+            "Vui lòng nhận lại KEY từ BOT."
 
-switch(txt.status){
+        );
 
-case "device_blocked":
+        return false;
 
-show(
-"🚫 Thiết bị không được phép",
-"KEY này đã được sử dụng trên một thiết bị khác."
-);
+    }
 
-break;
-
-case "wrong_slug":
-
-show(
-"⚠ Sai video",
-"KEY này chỉ dùng để xem video khác."
-);
-
-break;
-
-case "expired":
-
-show(
-"⌛ KEY đã hết hạn",
-"Vui lòng nhận KEY mới từ BOT."
-);
-
-break;
-
-case "fail":
-
-show(
-"❌ KEY không hợp lệ",
-"KEY không tồn tại hoặc đã bị thu hồi."
-);
-
-break;
-
-default:
-
-show(
-"❌ Không thể phát video",
-"Vui lòng thử lại sau."
-);
+    return true;
 
 }
 
-})
 
-.catch(()=>{
+/* ========================================
+   TẠO DEVICE ID
+======================================== */
 
-show(
-"🌐 Lỗi kết nối",
-"Không thể kết nối đến máy chủ."
-);
+function getDeviceId() {
 
-});
+    let deviceId =
+        localStorage.getItem(
+            "deviceId"
+        );
+
+
+    if (!deviceId) {
+
+        deviceId =
+            crypto.randomUUID();
+
+        localStorage.setItem(
+            "deviceId",
+            deviceId
+        );
+
+    }
+
+
+    return deviceId;
+
+}
+
+
+/* ========================================
+   XÁC MINH KEY
+======================================== */
+
+function verifyKey() {
+
+    if (!checkURL()) {
+
+        return;
+
+    }
+
+
+    showLoading();
+
+
+    const deviceId =
+        getDeviceId();
+
+
+    fetch(
+
+        "https://bot-api-phatvideo.abcd1601ab.workers.dev/" +
+
+        "?slug=" +
+        encodeURIComponent(slug) +
+
+        "&token=" +
+        encodeURIComponent(token) +
+
+        "&deviceId=" +
+        encodeURIComponent(deviceId)
+
+    )
+
+    .then(async r => {
+
+
+        /* =================================
+           SERVER TRẢ HTML VIDEO
+        ================================= */
+
+        if (r.ok) {
+
+            const html =
+                await r.text();
+
+
+            document.open();
+
+            document.write(html);
+
+            document.close();
+
+            return;
+
+        }
+
+
+        /* =================================
+           SERVER TRẢ JSON ERROR
+        ================================= */
+
+        let txt =
+            await r.text();
+
+
+        try {
+
+            txt =
+                JSON.parse(txt);
+
+        }
+
+        catch {
+
+            show(
+                "❌ Lỗi",
+                txt
+            );
+
+            return;
+
+        }
+
+
+        /* =================================
+           XỬ LÝ ERROR
+        ================================= */
+
+        switch (txt.status) {
+
+
+            case "device_blocked":
+
+                show(
+
+                    "🚫 Thiết bị không được phép",
+
+                    "KEY này đã được sử dụng trên một thiết bị khác."
+
+                );
+
+                break;
+
+
+            case "wrong_slug":
+
+                show(
+
+                    "⚠ Sai video",
+
+                    "KEY này chỉ dùng để xem video khác."
+
+                );
+
+                break;
+
+
+            case "expired":
+
+                show(
+
+                    "⌛ KEY đã hết hạn",
+
+                    "Vui lòng nhận KEY mới từ BOT."
+
+                );
+
+                break;
+
+
+            case "fail":
+
+                show(
+
+                    "❌ KEY không hợp lệ",
+
+                    "KEY không tồn tại hoặc đã bị thu hồi."
+
+                );
+
+                break;
+
+
+            default:
+
+                show(
+
+                    "❌ Không thể phát video",
+
+                    "Vui lòng thử lại sau."
+
+                );
+
+        }
+
+    })
+
+
+    .catch(() => {
+
+        show(
+
+            "🌐 Lỗi kết nối",
+
+            "Không thể kết nối đến máy chủ."
+
+        );
+
+    });
+
+}
+
+
+/* ========================================
+   TURNSTILE SUCCESS
+======================================== */
+
+async function onVerified(turnstileToken) {
+
+
+    const status =
+        document.getElementById(
+            "verifyStatus"
+        );
+
+
+    const loading =
+        document.getElementById(
+            "verifyLoading"
+        );
+
+
+    if (status) {
+
+        status.textContent =
+            "Đang kiểm tra xác minh...";
+
+        status.className = "";
+
+    }
+
+
+    if (loading) {
+
+        loading.style.display =
+            "block";
+
+    }
+
+
+    try {
+
+
+        /* ================================
+           GỬI TOKEN TURNSTILE
+        ================================= */
+
+        const response =
+            await fetch(
+
+                VERIFY_WORKER +
+                "/api/verify",
+
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            token:
+                                turnstileToken
+
+                        })
+
+                }
+
+            );
+
+
+        const result =
+            await response.json();
+
+
+        /* ================================
+           XÁC MINH THẤT BẠI
+        ================================= */
+
+        if (
+
+            !response.ok ||
+
+            !result.success
+
+        ) {
+
+            throw new Error(
+
+                result.message ||
+
+                "Xác minh thất bại."
+
+            );
+
+        }
+
+
+        /* ================================
+           XÁC MINH THÀNH CÔNG
+        ================================= */
+
+        if (status) {
+
+            status.textContent =
+                "Xác minh thành công.";
+
+            status.className =
+                "success";
+
+        }
+
+
+        if (loading) {
+
+            loading.style.display =
+                "none";
+
+        }
+
+
+        /* ================================
+           LƯU SESSION
+        ================================= */
+
+        if (result.session) {
+
+            sessionStorage.setItem(
+
+                "video_session",
+
+                result.session
+
+            );
+
+        }
+
+
+        /* ================================
+           CHO PHÉP CHẠY KEY
+        ================================= */
+
+        setTimeout(() => {
+
+            const overlay =
+                document.getElementById(
+                    "verifyOverlay"
+                );
+
+
+            if (overlay) {
+
+                overlay.style.display =
+                    "none";
+
+            }
+
+
+            verifyKey();
+
+        }, 400);
+
+
+    }
+
+    catch (error) {
+
+
+        console.error(
+            "TURNSTILE ERROR:",
+            error
+        );
+
+
+        if (loading) {
+
+            loading.style.display =
+                "none";
+
+        }
+
+
+        if (status) {
+
+            status.textContent =
+                error.message ||
+                "Không thể xác minh.";
+
+            status.className =
+                "error";
+
+        }
+
+
+        /* ================================
+           RESET TURNSTILE
+        ================================= */
+
+        if (
+            window.turnstile
+        ) {
+
+            try {
+
+                turnstile.reset();
+
+            }
+
+            catch (_) {}
+
+        }
+
+    }
+
+}
+
+
+/* ========================================
+   TURNSTILE EXPIRED
+======================================== */
+
+function onExpired() {
+
+    const status =
+        document.getElementById(
+            "verifyStatus"
+        );
+
+
+    const loading =
+        document.getElementById(
+            "verifyLoading"
+        );
+
+
+    if (loading) {
+
+        loading.style.display =
+            "none";
+
+    }
+
+
+    if (status) {
+
+        status.textContent =
+            "Xác minh đã hết hạn. Vui lòng thử lại.";
+
+        status.className =
+            "error";
+
+    }
+
+}
+
+
+/* ========================================
+   TURNSTILE ERROR
+======================================== */
+
+function onError() {
+
+    const status =
+        document.getElementById(
+            "verifyStatus"
+        );
+
+
+    const loading =
+        document.getElementById(
+            "verifyLoading"
+        );
+
+
+    if (loading) {
+
+        loading.style.display =
+            "none";
+
+    }
+
+
+    if (status) {
+
+        status.textContent =
+            "Không thể xác minh. Vui lòng thử lại.";
+
+        status.className =
+            "error";
+
+    }
+
+}
+
+
+/* ========================================
+   KHỞI ĐỘNG
+========================================
+
+   Không gọi verifyKey() trực tiếp.
+
+   Turnstile phải xác minh trước.
+
+======================================== */
