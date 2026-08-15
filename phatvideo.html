@@ -1,26 +1,129 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta name="viewport"
+      content="width=device-width,initial-scale=1">
+
 <title>Xem Video</title>
 
-<!-- CSS -->
-  <link rel="stylesheet" href="phatvideo.css">
+
+<!-- ==============================
+     CLOUDFLARE TURNSTILE
+================================ -->
+
+<script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer>
+</script>
+
+
+<!-- ==============================
+     CSS
+================================ -->
+
+<link rel="stylesheet"
+      href="phatvideo.css">
 
 </head>
+
+
 <body>
-    
+
+
+<!-- ==============================
+     VERIFY OVERLAY
+================================ -->
+
+<div id="verifyOverlay">
+
+    <div class="verify-box">
+
+        <div class="verify-icon">
+            ✓
+        </div>
+
+
+        <h1>
+            Xác minh người dùng
+        </h1>
+
+
+        <p class="verify-description">
+
+            Vui lòng xác nhận bạn là người dùng thật
+            để tiếp tục xem video.
+
+        </p>
+
+
+        <!-- TURNSTILE -->
+
+        <div class="turnstile-container">
+
+            <div
+                class="cf-turnstile"
+
+                data-sitekey="0x4AAAAAAEM48Q_7bMspPhI6"
+
+                data-theme="light"
+
+                data-callback="onVerified"
+
+                data-expired-callback="onExpired"
+
+                data-error-callback="onError">
+
+            </div>
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div id="verifyStatus">
+
+            Chưa xác minh
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div id="verifyLoading">
+
+            <div class="verify-spinner"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==============================
+     VIDEO PLAYER
+================================ -->
+
 <iframe
+
     id="player"
-    style="
-        width:100%;
-        height:100vh;
-        border:none;
-    "
+
     allowfullscreen>
+
 </iframe>
 
+
+<!-- ==============================
+     JS
+================================ -->
+
 <script src="js/phatvideo.js"></script>
+
 </body>
+
 </html>
