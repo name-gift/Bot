@@ -1,27 +1,310 @@
-body{
-  margin:0;
-  background:#000;
-  color:#fff;
-  font-family:sans-serif;
+/* ========================================
+   RESET
+======================================== */
+
+* {
+    box-sizing: border-box;
 }
-#login{
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
+
+
+/* ========================================
+   BODY
+======================================== */
+
+body {
+
+    margin: 0;
+
+    background: #000;
+
+    color: #fff;
+
+    font-family: sans-serif;
+
+    overflow: hidden;
+
 }
-input{
-  padding:12px;
-  width:280px;
+
+
+/* ========================================
+   VERIFY / LOGIN
+======================================== */
+
+#login {
+
+    height: 100vh;
+
+    width: 100vw;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+
 }
-button{
-  padding:12px 20px;
+
+
+/* ========================================
+   INPUT
+======================================== */
+
+input {
+
+    padding: 12px;
+
+    width: 280px;
+
 }
-iframe{
-  display:none;
-  width:100vw;
-  height:100vh;
-  border:none;
+
+
+/* ========================================
+   BUTTON
+======================================== */
+
+button {
+
+    padding: 12px 20px;
+
+}
+
+
+/* ========================================
+   VIDEO PLAYER
+======================================== */
+
+iframe {
+
+    display: none;
+
+    width: 100vw;
+
+    height: 100vh;
+
+    border: none;
+
+}
+
+
+/* ========================================
+   TURNSTILE BOX
+======================================== */
+
+#verifyOverlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 99999;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    background: #000;
+
+}
+
+
+/* ========================================
+   VERIFY BOX
+======================================== */
+
+.verify-box {
+
+    width: 380px;
+
+    max-width: calc(100% - 30px);
+
+    padding: 35px 25px;
+
+    background: #fff;
+
+    color: #111827;
+
+    border-radius: 18px;
+
+    text-align: center;
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.5);
+
+}
+
+
+/* ========================================
+   ICON
+======================================== */
+
+.verify-icon {
+
+    width: 60px;
+
+    height: 60px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #2563eb;
+
+    color: #fff;
+
+    font-size: 27px;
+
+    font-weight: bold;
+
+}
+
+
+/* ========================================
+   TITLE
+======================================== */
+
+.verify-box h1 {
+
+    margin: 0 0 10px;
+
+    font-size: 23px;
+
+}
+
+
+/* ========================================
+   DESCRIPTION
+======================================== */
+
+.verify-description {
+
+    margin: 0 0 25px;
+
+    color: #6b7280;
+
+    line-height: 1.5;
+
+}
+
+
+/* ========================================
+   TURNSTILE
+======================================== */
+
+.turnstile-container {
+
+    display: flex;
+
+    justify-content: center;
+
+    min-height: 65px;
+
+}
+
+
+/* ========================================
+   STATUS
+======================================== */
+
+#verifyStatus {
+
+    margin-top: 15px;
+
+    font-size: 14px;
+
+    color: #6b7280;
+
+}
+
+
+#verifyStatus.success {
+
+    color: #16a34a;
+
+}
+
+
+#verifyStatus.error {
+
+    color: #dc2626;
+
+}
+
+
+/* ========================================
+   LOADING
+======================================== */
+
+#verifyLoading {
+
+    display: none;
+
+    margin-top: 15px;
+
+}
+
+
+/* ========================================
+   SPINNER
+======================================== */
+
+.verify-spinner {
+
+    width: 25px;
+
+    height: 25px;
+
+    margin: auto;
+
+    border: 3px solid #e5e7eb;
+
+    border-top-color: #2563eb;
+
+    border-radius: 50%;
+
+    animation: verifySpin .8s linear infinite;
+
+}
+
+
+/* ========================================
+   SPINNER ANIMATION
+======================================== */
+
+@keyframes verifySpin {
+
+    to {
+
+        transform: rotate(360deg);
+
+    }
+
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 480px) {
+
+    .verify-box {
+
+        width: calc(100% - 30px);
+
+        padding: 30px 20px;
+
+    }
+
 }
